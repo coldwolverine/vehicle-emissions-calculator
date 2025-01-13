@@ -11,13 +11,12 @@ import {
   BarChart,
   CartesianGrid,
   LabelList,
-  Rectangle,
   XAxis,
   YAxis,
   ResponsiveContainer,
 } from "recharts";
 import {
-  ChartConfig,
+  // ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,

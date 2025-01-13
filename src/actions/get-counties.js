@@ -28,7 +28,7 @@ export async function getCounties(state) {
 
     const counties = countiesData.rows.map((row) => row["County name"]);
     return counties;
-  } catch (error) {
+  } catch {
     // console.error("Error fetching data:", error);
     throw new Error("Error: failed to retrieve data.");
   } finally {

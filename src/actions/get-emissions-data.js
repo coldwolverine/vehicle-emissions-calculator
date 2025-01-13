@@ -72,7 +72,7 @@ export async function getEmissionsData(
       maxEmissionsDifference,
       minEmissionsDifference,
     };
-  } catch (error) {
+  } catch {
     // console.error("Error in getEmissionsData:", error);
     throw new Error("Error: failed to retrieve data.");
   } finally {

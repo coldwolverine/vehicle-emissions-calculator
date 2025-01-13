@@ -112,7 +112,7 @@ export async function getHeatmapData(
       percentage_change: percentageChange,
       vehicle_data: combinedDataDict,
     };
-  } catch (error) {
+  } catch {
     // console.error(error);
     throw new Error("Error: failed to retrieve data.");
   } finally {
