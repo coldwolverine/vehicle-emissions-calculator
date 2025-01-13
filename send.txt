@@ -1,0 +1,13 @@
+rsync -avz --progress --exclude 'node_modules' --exclude '.git' --exclude '.env' --exclude 'data/' \
+-e "ssh -i ~/.ssh/emissions-dashboard.pem" \
+package.json ubuntu@ec2-3-145-77-104.us-east-2.compute.amazonaws.com:~/app
+
+pm2 start npm --name "nextjs-app" -- start
+
+brew services start postgresql@14
+psql -h emissions-db.cri8o6ysc69n.us-east-2.rds.amazonaws.com -p 5432 -U postgres -d emissions -f modified_emissions_dump.sql
+1iztZaoN8iyoUfjqJWTn
+
+/opt/homebrew//var/postgresql@14/pg_hba.conf
+
+pg_restore -h emissions-db.cri8o6ysc69n.us-east-2.rds.amazonaws.com -U postgres -d emissions -v emissions_dump.pg
