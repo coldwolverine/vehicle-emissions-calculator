@@ -22,6 +22,20 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { getLifetimeMiles } from "@/utils/helpers";
+import PowertrainTypesLegend from "@/components/legend";
+
+const CustomXAxisLabel = ({ viewBox }) => {
+  const { width, height, x, y } = viewBox;
+  return (
+    <text x={x + width / 2} y={y + height + 3} textAnchor="middle" fill="#666">
+      Total Lifecycle Emissions (MTCO
+      <tspan baselineShift="sub" className="text-[9px]">
+        2
+      </tspan>
+      e)
+    </text>
+  );
+};
 
 export default function TwoVehicleComparisonCard({
   heatmapData,
@@ -101,94 +115,96 @@ export default function TwoVehicleComparisonCard({
   };
 
   return (
-    <Card className="max-w-screen-md mx-auto bg-slate-50">
-      <CardHeader className="space-y-0">
-        <CardTitle className="text-lg">
-          Two Vehicle Emissions Comparison
-        </CardTitle>
-        <CardDescription className="">
-          In {county}, {state}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto h-[200px] w-full"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              accessibilityLayer
-              data={chartData}
-              layout="vertical"
-              // margin={{
-              //   left: 15,
-              //   right: 5,
-              // }}
-              margin={{
-                top: 0,
-                right: 50,
-                bottom: 0,
-                left: 0,
-              }}
-            >
-              <CartesianGrid vertical={true} />
-              <YAxis
-                dataKey="vehicle"
-                type="category"
-                tickLine={true}
-                tickMargin={7}
-                axisLine={true}
-                tickFormatter={(value) => chartConfig[value]?.label}
-                width={90}
-              />
-              <XAxis dataKey="emissions" type="number" />
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    hideLabel
-                    formatter={(value, name, item) => (
-                      <>
-                        <div
-                          className="h-2.5 w-2.5 shrink-0 rounded-[2px] bg-[--color-bg]"
-                          style={{
-                            "--color-bg": `var(--color-${item?.payload?.vehicle})`,
-                          }}
-                        />
-                        <div className="flex min-w-[170px] items-center text-xs text-muted-foreground">
-                          {chartConfig[name]?.label || name}
-                          <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
-                            {value}
-                            <span className="ml-1 font-normal text-muted-foreground">
-                              MTCO2e
-                            </span>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  />
-                }
-                cursor={true}
-                defaultIndex={1}
-              />
-              <Bar
-                dataKey="emissions"
-                // layout="vertical"
-                radius={5}
-                barSize={30}
+    <div className="mx-auto max-w-screen-md">
+      <Card className="bg-slate-50">
+        <CardHeader className="space-y-0 text-center">
+          <CardTitle className="text-lg">
+            Two Vehicle Emissions Comparison
+          </CardTitle>
+          <CardDescription className="">
+            In {county}, {state}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="">
+          <ChartContainer
+            config={chartConfig}
+            className="mx-auto h-[210px] w-full"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                accessibilityLayer
+                data={chartData}
+                layout="vertical"
+                margin={{
+                  top: 0,
+                  right: 50,
+                  bottom: 10,
+                  left: 0,
+                }}
               >
-                <LabelList
-                  dataKey="emissions"
-                  position="right"
-                  offset={8}
-                  className="fill-foreground"
-                  fontSize={12}
-                  formatter={(value) => `${value}`}
+                <CartesianGrid vertical={true} />
+                <YAxis
+                  dataKey="vehicle"
+                  type="category"
+                  tickLine={true}
+                  tickMargin={7}
+                  axisLine={true}
+                  tickFormatter={(value) => chartConfig[value]?.label}
+                  width={90}
+                  style={{ fill: "var(--color-foreground)" }}
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-        {/* <br />
+                <XAxis
+                  dataKey="emissions"
+                  type="number"
+                  label={<CustomXAxisLabel />}
+                />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      hideLabel
+                      formatter={(value, name, item) => (
+                        <>
+                          <div
+                            className="h-2.5 w-2.5 shrink-0 rounded-[2px] bg-[--color-bg]"
+                            style={{
+                              "--color-bg": `var(--color-${item?.payload?.vehicle})`,
+                            }}
+                          />
+                          <div className="flex min-w-[170px] items-center text-xs text-muted-foreground">
+                            {chartConfig[name]?.label || name}
+                            <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                              {value}
+                              <span className="ml-1 font-normal text-muted-foreground">
+                                MTCO<sub>2</sub>e
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    />
+                  }
+                  cursor={true}
+                  defaultIndex={1}
+                />
+                <Bar
+                  dataKey="emissions"
+                  // layout="vertical"
+                  radius={5}
+                  barSize={30}
+                >
+                  <LabelList
+                    dataKey="emissions"
+                    position="right"
+                    offset={8}
+                    className="fill-foreground"
+                    fontSize={12}
+                    formatter={(value) => `${value}`}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+          {/* <br />
         <p>
           Lifecycle emissions of <b className="font-semibold">{firstVehicle}</b>{" "}
           with <b className="font-semibold">{firstPowertrain}</b>:{" "}
@@ -203,17 +219,17 @@ export default function TwoVehicleComparisonCard({
         <p>
           <b className="font-semibold">Difference</b>: {difference} MTCO2e
         </p> */}
-      </CardContent>
-      {/* <CardFooter></CardFooter> */}
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          {leastEmissionsVehicle} produces lesser emissions over its lifecycle
-        </div>
-        <div className="leading-none text-muted-foreground">
-          By {difference} MTCO2e
-          {/* Showing lifecycle emissions in MTCO2e */}
-        </div>
-      </CardFooter>
-    </Card>
+        </CardContent>
+        <CardFooter className="flex-col items-center gap-2 text-sm">
+          <div className="flex gap-2 font-medium leading-none">
+            {leastEmissionsVehicle} produces lesser emissions over its lifecycle
+          </div>
+          <div className="leading-none text-muted-foreground">
+            By {Math.abs(difference)} MTCO<sub>2</sub>e
+          </div>
+        </CardFooter>
+      </Card>
+      <PowertrainTypesLegend />
+    </div>
   );
 }

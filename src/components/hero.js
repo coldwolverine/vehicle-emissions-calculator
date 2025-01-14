@@ -3,21 +3,26 @@ import Link from "next/link";
 export default function Hero() {
   return (
     <>
-      <h2 className="scroll-m-20 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0">
+      <h2
+        id="about-tool"
+        className="scroll-m-48 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
+      >
         About This Tool
       </h2>
       <div className="h-[3px]" />
       <p className="leading-7 [&:not(:first-child)]:mt-6 mt-6">
-        This tool calculates the total lifecycle greenhouse gas emissions for
-        new vehicle purchases by factoring in your location and driving
-        patterns. Lifecycle emissions include emissions from: manufacturing,
-        petroleum extraction, battery production (for electric vehicles),
-        emissions from driving the vehicle (use phase), and end-of-life
-        disposal.
+        Calculate total lifecycle greenhouse gas emissions for new vehicles
+        based on your location and driving patterns. Lifecycle emissions include
+        emissions from manufacturing, petroleum extraction and battery
+        production (for electric vehicles), emissions from driving the vehicle
+        (use phase) and end-of-life disposal.
       </p>
       <br />
 
-      <h2 className="scroll-m-20 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0">
+      <h2
+        id="tool-guide"
+        className="scroll-m-48 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
+      >
         Tool Guide
       </h2>
       <div className="h-[3px]" />
@@ -29,66 +34,71 @@ export default function Hero() {
         First, user must select location. Default are set for driving patterns
         using EPA and SAE standards. You can modify city/highway… */}
         <div className="text-lg font-semibold tracking-tight mb-3">
-          Guide for Input Parameters
-        </div>{" "}
-        Start by following these simple steps to compare vehicle lifecycle
-        emissions:
+          Instructions
+        </div>
         <ol className="ml-6 list-decimal list-inside">
           <li>
-            <b>Select Location</b> by choosing your region to calculate accurate
-            vehicle emissions. Your location affects both electricity grid
-            emissions (based on NREL&apos;s Cambium projections for 134 regions)
-            and temperature effects based on county-specific climate data.
+            <b>Select Location:</b> Set your region for accurate electricity
+            grid mix (NREL Cambium Model) and temperature-based variations
+            (NOAA).
           </li>
           <li>
-            <b>Pick two generic models</b> to compare. Choose Vehicles by
-            selecting vehicle class (Compact Sedan, Midsize Sedan, Small SUV,
-            Midsize SUV or Pickup) and powertrain type (Battery Electric,
-            Plug-in Hybrid, Hybrid, or Internal Combustion Engine).
+            <b>Vehicle Comparison:</b> Compare two models by selecting:
+            <ul className="ml-6 list-disc list-inside">
+              <li>
+                <u>Class:</u> Compact/Midsize Sedan, Small/Midsize SUV, or
+                Pickup
+              </li>
+              <li>
+                <u>Powertrain:</u> Battery Electric, Plug-in Hybrid, Hybrid, or
+                Internal Combustion
+              </li>
+            </ul>
           </li>
           <li>
-            <b>Customize Use</b> by adjusting the city/highway driving split
-            and, for PHEVs, setting the Utility Factor (percentage of electric
-            driving) based on your charging habits. Not sure? Use our default
+            <b>Driving pattern:</b> Adjust city/highway split and PHEV Utility
+            Factor (percentage of Electric driving). Not sure? Keep our default
             settings based on EPA and SAE standards for typical U.S. driving
             patterns.
           </li>
         </ol>
         <br />
         <div className="text-lg font-semibold tracking-tight mb-3">
-          Guide for Results
+          Results
         </div>{" "}
         View your comparison across three tabs:
         <ol className="ml-6 list-decimal list-inside">
           <li>
-            <b> Vehicle Comparison</b> shows total lifecycle greenhouse gas
-            emissions (MTCO2-eq) for your two selected vehicles, including the
-            emissions difference between them.
+            <b> Two Vehicle Comparison</b> compares lifecycle greenhouse gas
+            emissions for selected vehicles.
           </li>
           <li>
-            <b>Vehicle Matrix</b> displays a heatmap comparing emissions across
-            all available vehicles. Compare each model to your first vehicle
-            selection and hover over cells to view detailed lifecycle and
-            vehicle cycle emissions data.
+            <b>Compare All Vehicles</b> displays a heatmap comparing emissions
+            across all available vehicle models.
           </li>
           <li>
-            <b>Geographic View </b> presents an interactive U.S. map showing how
-            your selected vehicles compare across all counties, accounting for
-            regional differences in electricity grid emissions.
+            <b>Emissions Differences by US County</b> presents an interactive
+            county-level map displaying regional emission variations for
+            selected vehicles. Regional differences account for variations in
+            temperature and electricity grid mix.
           </li>
         </ol>
       </div>
       <br />
 
-      <h2 className="scroll-m-20 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0">
+      <h2
+        id="model-info"
+        className="scroll-m-48 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
+      >
         Model Information
       </h2>
       <div className="h-[3px]" />
       <div className="leading-7 [&:not(:first-child)]:mt-6 mt-6">
-        Total life cycle emissions are the sum of both: (1) <b>vehicle cycle</b>{" "}
-        emissions including vehicle production and disposal based on the GREET
-        2023 model, and (2) <b>use phase</b> emissions including both driving
-        and upstream sources like fuel production and electricity generation.
+        <b>Total life cycle emissions</b> combine two key phases: (1){" "}
+        <b>vehicle cycle</b> emissions including <i>vehicle production</i> and{" "}
+        <i>disposal</i> based on the GREET 2023 model, and (2) <b>use phase</b>{" "}
+        emissions including both <i>driving</i> and{" "}
+        <i>upstream fuel production</i> and/or <i>electricity generation</i>.
         <br />
         <br />
         Default calculations assume:
@@ -108,10 +118,10 @@ export default function Hero() {
           </li>
         </ul>
         <br />
-        Grid decarbonization over the vehicle&apos;s lifetime is factored into
-        the analysis and based on grid intensity projections from NREL&apos;s
-        Cambium model. For complete methodology details, please reference Smith
-        et. al, 2025 (linked below). Please email us at{" "}
+        <b>Grid decarbonization</b> over the vehicle&apos;s lifetime is factored
+        into the analysis and based on grid intensity projections from
+        NREL&apos;s Cambium model. For complete methodology details, please
+        reference Smith et. al, 2025 (linked below). Please email us at{" "}
         <Link
           href="mailto:gregak@umich.edu"
           className="text-blue-500 underline"

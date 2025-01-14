@@ -1,24 +1,35 @@
 // components/Footer.js
 import Link from "next/link";
+import Image from "next/image";
+import logo from "@/../public/css-logo-white-long.png";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-gray-300 py-5">
-      <div className="max-w-screen-xl mx-auto text-center">
-        <div className="flex justify-center space-x-8">
+    <footer className="bg-[#00274C] text-gray-200 py-8">
+      <div className="flex justify-center items-center gap-40">
+        <div className="flex justify-center space-x-12">
           <Link
             href="mailto:gregak@umich.edu"
-            className="text-gray-400 hover:text-white"
+            className="text-gray-300 hover:text-[#ffc107]"
             target="external"
           >
             Contact
           </Link>
           <Link
             href="/"
-            className="text-gray-400 hover:text-white"
+            className="text-gray-300 hover:text-[#ffc107]"
             target="external"
           >
             Smith et al. 2025
+          </Link>
+        </div>
+        <div className="flex justify-center order-[-1]">
+          <Link
+            href="https://css.umich.edu/"
+            target="external"
+            className="hover:cursor-pointer"
+          >
+            <Image src={logo} alt="CSS Logo" width={400} height={200} />
           </Link>
         </div>
       </div>

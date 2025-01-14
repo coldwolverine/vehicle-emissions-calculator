@@ -149,8 +149,14 @@ const VehicleComparisonForm = ({ form }) => {
 
   return (
     <Form {...form}>
-      <h2 className="w-full scroll-m-20 border-b pb-2 mb-6 text-2xl font-semibold tracking-tight first:mt-0">
-        Input Parameters
+      <h2
+        id="input-params"
+        className="flex space-x-3 w-full scroll-m-48 border-b pb-2 mb-6 text-2xl font-semibold tracking-tight first:mt-0"
+      >
+        <span>Input Parameters</span>
+        <div className="bg-[#ffc107] h-[30px] text-sm tracking-tight text-[#212529] leading-3 my-0 py-2 font-semibold border rounded-[5px] shadow px-2">
+          Set Values
+        </div>
       </h2>
       <form
         onSubmit={form.handleSubmit(onSubmit)}

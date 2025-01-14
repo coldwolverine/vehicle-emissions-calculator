@@ -94,9 +94,17 @@ export async function getHeatmapData(
     );
     // console.log("[API] Computed percentage change data ");
     // console.log(percentageChange);
+    let mostEfficientVehicle = null;
+    let mostEfficentTotalEmissionsPerMile = Infinity;
 
     const combinedDataDict = combinedData.reduce((acc, item) => {
       const key = `${item.Vehicle_Type}:${item.PowerTrain}`;
+      if (
+        item.Total_Emissions_per_mile_gCO2e < mostEfficentTotalEmissionsPerMile
+      ) {
+        mostEfficientVehicle = `${item.Vehicle_Type} with ${item.PowerTrain}`;
+        mostEfficentTotalEmissionsPerMile = item.Total_Emissions_per_mile_gCO2e;
+      }
       acc[key] = {
         Total_Emissions_per_mile_gCO2e: item.Total_Emissions_per_mile_gCO2e,
         Production_phase_emissions_kgCO2e:
@@ -105,12 +113,14 @@ export async function getHeatmapData(
       };
       return acc;
     }, {});
-    // console.log(combinedDataDict);
+    console.log(mostEfficientVehicle);
 
     // Return the heatmap data
     return {
       percentage_change: percentageChange,
       vehicle_data: combinedDataDict,
+      least_emissions_vehicle: mostEfficientVehicle,
+      least_total_emissions_per_mile: mostEfficentTotalEmissionsPerMile,
     };
   } catch {
     // console.error(error);

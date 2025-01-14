@@ -8,6 +8,14 @@ import geojsonData from "@/../data/georef-usa-county.json";
 import chroma from "chroma-js";
 import { Spinner } from "@/components/ui/spinner";
 import debounce from "lodash.debounce";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  // CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const USMap = ({
   firstVehicle = "Pickup",
@@ -117,11 +125,15 @@ const USMap = ({
   const onEachFeature = (feature, layer) => {
     layer.bindTooltip(
       `<strong>${feature.properties.coty_name[0]} County</strong><br />
-    First Emissions: ${feature.properties.first_emissions || 0} MT CO2e<br />
-    Second Emissions: ${feature.properties.second_emissions || 0} MT CO2e<br />
+    Vehicle 1 Emissions: ${
+      feature.properties.first_emissions || 0
+    } gCO<sub>2</sub>e/mile<br />
+    Vehicle 2 Emissions: ${
+      feature.properties.second_emissions || 0
+    } gCO<sub>2</sub>e/mile<br />
     Emissions Difference: ${
       feature.properties.emissions_difference || 0
-    } MT CO2e`,
+    } gCO<sub>2</sub>e/mile`,
       {
         sticky: true,
         offset: [10, 0],
@@ -202,7 +214,9 @@ const USMap = ({
           boxShadow: "0 0 15px rgba(0, 0, 0, 0.2)", // Shadow
         }}
       >
-        <div className="mb-[5px]">Emissions Difference (gCO2e/mile)</div>
+        <div className="mb-[5px]">
+          Emissions Difference (gCO<sub>2</sub>e/mile)
+        </div>
         <div
           className="h-[20px] w-full relative"
           style={{ background: gradient }}
@@ -233,45 +247,74 @@ const USMap = ({
   };
 
   return (
-    <div className="h-[600px] w-[1100px]">
-      <MapContainer
-        center={mapCenter}
-        zoom={zoomLevel}
-        zoomSnap={0.5}
-        className="h-full w-full"
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />{" "}
-        {loading ? (
-          <div
-            className="flex flex-col items-center justify-center w-full h-full absolute inset-0 z-[10000]"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.8)",
-            }}
-          >
-            <Spinner size="md" />
-            <p>Loading Map...</p>
+    <Card className="max-w-screen-xl mx-auto bg-slate-50">
+      <CardHeader className="space-y-0 text-center">
+        <CardTitle className="text-lg">
+          Lifecycle Emissions Difference per Mile by U.S. County (gCO
+          <sub>2</sub>e/mile)
+        </CardTitle>
+        <CardDescription className="">
+          <span>Between </span>{" "}
+          <span className="font-bold">
+            {firstVehicle}, {firstPowertrain}
+          </span>{" "}
+          (Vehicle 1) and{" "}
+          <span className="font-bold">
+            {secondVehicle}, {secondPowertrain}
+          </span>{" "}
+          (Vehicle 2)
+          {/* <div>
+            <span className="font-bold">Vehicle 1:</span> {firstVehicle},{" "}
+            {firstPowertrain}
           </div>
-        ) : (
-          <>
-            {updatedGeojsonData && (
-              <GeoJSON
-                data={updatedGeojsonData.features}
-                onEachFeature={onEachFeature}
-                style={style}
-              />
+          <div>
+            <span className="font-bold">Vehicle 2:</span> {secondVehicle},{" "}
+            {secondPowertrain}
+          </div> */}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[600px] w-[1050px]">
+          <MapContainer
+            center={mapCenter}
+            zoom={zoomLevel}
+            zoomSnap={0.5}
+            className="h-full w-full"
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />{" "}
+            {loading ? (
+              <div
+                className="flex flex-col items-center justify-center w-full h-full absolute inset-0 z-[10000]"
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                }}
+              >
+                <Spinner size="md" />
+                <p>Loading Map...</p>
+              </div>
+            ) : (
+              <>
+                {updatedGeojsonData && (
+                  <GeoJSON
+                    data={updatedGeojsonData.features}
+                    onEachFeature={onEachFeature}
+                    style={style}
+                  />
+                )}
+                <Legend
+                  minEmissionsDifference={minEmissionsDifference}
+                  maxEmissionsDifference={maxEmissionsDifference}
+                />
+              </>
             )}
-            <Legend
-              minEmissionsDifference={minEmissionsDifference}
-              maxEmissionsDifference={maxEmissionsDifference}
-            />
-          </>
-        )}
-        <HomeButton />
-      </MapContainer>
-    </div>
+            <HomeButton />
+          </MapContainer>
+        </div>
+      </CardContent>{" "}
+    </Card>
   );
 };
 

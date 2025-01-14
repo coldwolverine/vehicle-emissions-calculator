@@ -113,7 +113,10 @@ export default function Dashboard() {
     <main className="flex flex-col justify-center items-center">
       <VehicleComparisonForm form={form} />
       <div className="h-[40px]"></div>
-      <h2 className="w-full scroll-m-20 border-b pb-2 mb-6 text-2xl font-semibold tracking-tight first:mt-0">
+      <h2
+        id="results"
+        className="w-full scroll-m-48 border-b pb-2 mb-6 text-2xl font-semibold tracking-tight first:mt-0"
+      >
         Results
       </h2>
       <Tabs defaultValue="compare-two-vehicles" className="w-[1100px]">
@@ -147,6 +150,7 @@ export default function Dashboard() {
             secondVehicle={secondVehicle}
             secondPowertrain={secondPowertrain}
             county={county}
+            state={state}
           />
         </TabsContent>
         <TabsContent value="us-map" className="min-h-[600px]">
