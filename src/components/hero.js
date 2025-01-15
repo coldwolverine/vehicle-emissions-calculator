@@ -5,7 +5,7 @@ export default function Hero() {
     <>
       <h2
         id="about-tool"
-        className="scroll-m-48 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
+        className="scroll-m-8 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
       >
         About This Tool
       </h2>
@@ -21,7 +21,7 @@ export default function Hero() {
 
       <h2
         id="tool-guide"
-        className="scroll-m-48 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
+        className="scroll-m-8 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
       >
         Tool Guide
       </h2>
@@ -88,7 +88,7 @@ export default function Hero() {
 
       <h2
         id="model-info"
-        className="scroll-m-48 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
+        className="scroll-m-8 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
       >
         Model Information
       </h2>

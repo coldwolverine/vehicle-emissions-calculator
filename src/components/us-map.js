@@ -253,12 +253,12 @@ const USMap = ({
           Lifecycle Emissions Difference per Mile by U.S. County (gCO
           <sub>2</sub>e/mile)
         </CardTitle>
-        <CardDescription className="">
-          <span>Between </span>{" "}
+        <CardDescription className="text-base">
+          <span>Switching from</span>{" "}
           <span className="font-bold">
             {firstVehicle}, {firstPowertrain}
           </span>{" "}
-          (Vehicle 1) and{" "}
+          (Vehicle 1) to{" "}
           <span className="font-bold">
             {secondVehicle}, {secondPowertrain}
           </span>{" "}

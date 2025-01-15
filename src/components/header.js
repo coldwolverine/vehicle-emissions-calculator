@@ -5,7 +5,7 @@ import logo from "@/../public/block-m-logo.png";
 
 const Header = () => {
   return (
-    <div className="bg-[#00274C] sticky top-0 z-50">
+    <div className="bg-[#00274C] ">
       {/* Main Header Content */}
       <div className="flex items-center justify-between px-4">
         {/* Logo */}

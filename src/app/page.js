@@ -115,7 +115,7 @@ export default function Dashboard() {
       <div className="h-[40px]"></div>
       <h2
         id="results"
-        className="w-full scroll-m-48 border-b pb-2 mb-6 text-2xl font-semibold tracking-tight first:mt-0"
+        className="w-full scroll-m-8 border-b pb-2 mb-6 text-2xl font-semibold tracking-tight first:mt-0"
       >
         Results
       </h2>

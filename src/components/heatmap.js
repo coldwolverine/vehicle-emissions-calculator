@@ -83,7 +83,7 @@ const EmissionsHeatmap = ({
   const getTotalEmissions = (vehicle, powertrain) => {
     const totalEmissionsPerMile = getTotalEmissionsPerMile(vehicle, powertrain);
     const lifetimeMiles = getLifetimeMiles(vehicle);
-    return ((totalEmissionsPerMile * lifetimeMiles) / 1_000_000).toFixed(2);
+    return ((totalEmissionsPerMile * lifetimeMiles) / 1_000_000).toFixed(0);
   };
 
   const getVehicleCycleEmissions = (vehicle, powertrain) => {
@@ -115,7 +115,7 @@ const EmissionsHeatmap = ({
             <TooltipContent
               side="top"
               align="start"
-              className="w-[330px] break-words"
+              className="w-[340px] break-words"
             >
               <div className="flex">
                 <div>
@@ -192,7 +192,7 @@ const EmissionsHeatmap = ({
               Lifecycle Emissions across Vehicle Classes and Powertrains (gCO
               <sub>2</sub>e/mile)
             </CardTitle>
-            <CardDescription className="">
+            <CardDescription className="text-base">
               % of Emissions Compared to{" "}
               <span className="font-semibold">{firstVehicle}</span> with{" "}
               <span className="font-semibold">{firstPowertrain}</span> in{" "}
@@ -279,7 +279,7 @@ const EmissionsHeatmap = ({
               />
             </div>
           </CardContent>
-          <CardFooter className="flex-col items-center gap-2 text-sm">
+          <CardFooter className="flex-col items-center gap-2 text-base">
             <div className="gap-2 font-medium leading-none">
               {data.least_emissions_vehicle} is the most efficient vehicle based
               on lifecycle emissions per mile

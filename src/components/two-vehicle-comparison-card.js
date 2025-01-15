@@ -27,9 +27,15 @@ import PowertrainTypesLegend from "@/components/legend";
 const CustomXAxisLabel = ({ viewBox }) => {
   const { width, height, x, y } = viewBox;
   return (
-    <text x={x + width / 2} y={y + height + 3} textAnchor="middle" fill="#666">
+    <text
+      x={x + width / 2}
+      y={y + height + 3}
+      textAnchor="middle"
+      fill="#666"
+      className="text-sm"
+    >
       Total Lifecycle Emissions (MTCO
-      <tspan baselineShift="sub" className="text-[9px]">
+      <tspan baselineShift="sub" className="text-[10px]">
         2
       </tspan>
       e)
@@ -121,7 +127,7 @@ export default function TwoVehicleComparisonCard({
           <CardTitle className="text-lg">
             Two Vehicle Emissions Comparison
           </CardTitle>
-          <CardDescription className="">
+          <CardDescription className="text-base">
             In {county}, {state}
           </CardDescription>
         </CardHeader>
@@ -204,23 +210,8 @@ export default function TwoVehicleComparisonCard({
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>
-          {/* <br />
-        <p>
-          Lifecycle emissions of <b className="font-semibold">{firstVehicle}</b>{" "}
-          with <b className="font-semibold">{firstPowertrain}</b>:{" "}
-          {vehicle1Emissions} MTCO2e
-        </p>
-        <p>
-          Lifecycle emissions of{" "}
-          <b className="font-semibold">{secondVehicle}</b> with{" "}
-          <b className="font-semibold">{secondPowertrain}</b>:{" "}
-          {vehicle2Emissions} MTCO2e
-        </p>
-        <p>
-          <b className="font-semibold">Difference</b>: {difference} MTCO2e
-        </p> */}
         </CardContent>
-        <CardFooter className="flex-col items-center gap-2 text-sm">
+        <CardFooter className="flex-col items-center gap-2 text-base">
           <div className="flex gap-2 font-medium leading-none">
             {leastEmissionsVehicle} produces lesser emissions over its lifecycle
           </div>
