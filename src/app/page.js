@@ -53,6 +53,7 @@ export default function Dashboard() {
         cityDriving
       ) => {
         if (state && county && firstVehicle && firstPowertrain) {
+          isLoading(true);
           getHeatmapData(
             state,
             county,
