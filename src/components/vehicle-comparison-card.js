@@ -74,7 +74,7 @@ export default function TwoVehicleComparisonCard({
   const getTotalEmissions = (vehicle, powertrain) => {
     const totalEmissionsPerMile = getTotalEmissionsPerMile(vehicle, powertrain);
     const lifetimeMiles = getLifetimeMiles(vehicle);
-    return ((totalEmissionsPerMile * lifetimeMiles) / 1_000_000).toFixed(0);
+    return Math.round((totalEmissionsPerMile * lifetimeMiles) / 1_000_000);
   };
 
   // Calculate lifecycle emissions and difference
@@ -83,7 +83,7 @@ export default function TwoVehicleComparisonCard({
     secondVehicle && secondPowertrain
       ? getTotalEmissions(secondVehicle, secondPowertrain)
       : 0;
-  const difference = (vehicle1Emissions - vehicle2Emissions).toFixed(2);
+  const difference = Math.abs(vehicle1Emissions - vehicle2Emissions).toFixed(0);
   const leastEmissionsVehicle =
     vehicle1Emissions < vehicle2Emissions
       ? `${firstVehicle} ${firstPowertrain}`
@@ -116,6 +116,12 @@ export default function TwoVehicleComparisonCard({
     },
   };
 
+  // Custom domain function to calculate the upper bound
+  const calculateDomain = (data) => {
+    const maxValue = Math.max(...data.map((d) => d.emissions));
+    return [0, Math.ceil(maxValue * 1.1)]; // Add some padding to the upper bound
+  };
+
   return (
     <div className="mx-auto max-w-screen-md">
       <Card className="bg-slate-50">
@@ -140,6 +146,7 @@ export default function TwoVehicleComparisonCard({
             >
               <BarChart
                 accessibilityLayer
+                key={JSON.stringify(chartData)}
                 data={chartData}
                 layout="vertical"
                 margin={{
@@ -167,6 +174,7 @@ export default function TwoVehicleComparisonCard({
                   dataKey="emissions"
                   type="number"
                   label={<CustomXAxisLabel />}
+                  domain={calculateDomain(chartData)}
                 />
                 <ChartTooltip
                   content={
@@ -225,7 +233,7 @@ export default function TwoVehicleComparisonCard({
                 lifecycle
               </div>
               <div className="leading-none text-muted-foreground">
-                By {Math.abs(difference)} Metric Tons CO<sub>2</sub>e
+                By {difference} Metric Tons CO<sub>2</sub>e
               </div>
             </>
           )}

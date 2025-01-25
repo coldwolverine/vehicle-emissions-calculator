@@ -53,7 +53,6 @@ export default function Dashboard() {
         cityDriving
       ) => {
         if (state && county && firstVehicle && firstPowertrain) {
-          isLoading(true);
           getHeatmapData(
             state,
             county,
@@ -80,6 +79,7 @@ export default function Dashboard() {
   // Use useEffect to watch for changes and call the debounced function
   useEffect(() => {
     if (state && county && firstVehicle && firstPowertrain) {
+      setIsLoading(true);
       debouncedUpdateHeatmap(
         state,
         county,
@@ -90,6 +90,11 @@ export default function Dashboard() {
         cityDriving
       );
     }
+
+    return () => {
+      // setIsLoading(false);
+      debouncedUpdateHeatmap.cancel();
+    };
   }, [
     state,
     county,

@@ -65,7 +65,7 @@ const EmissionsHeatmap = ({
   const getTotalEmissions = (vehicle, powertrain) => {
     const totalEmissionsPerMile = getTotalEmissionsPerMile(vehicle, powertrain);
     const lifetimeMiles = getLifetimeMiles(vehicle);
-    return ((totalEmissionsPerMile * lifetimeMiles) / 1_000_000).toFixed(0);
+    return Math.round((totalEmissionsPerMile * lifetimeMiles) / 1_000_000);
   };
 
   const getVehicleCycleEmissions = (vehicle, powertrain) => {
@@ -246,16 +246,19 @@ const EmissionsHeatmap = ({
           ""
         )}
       </Card>
-      <div className="flex items-start justify-between w-[946px] mt-9">
-        <PowertrainTypesLegend className="max-w-[600px]" />
-        <HeatmapColorLegend
-          lowestTotalEmissionsPerMile={data.least_total_emissions_per_mile}
-          highestTotalEmissionsPerMile={data.highest_total_emissions_per_mile}
-          leastEmissionsVehicle={data.least_emissions_vehicle}
-          highestEmissionsVehicle={data.highest_emissions_vehicle}
-        />
-      </div>
-
+      {Object.keys(data).length > 0 ? (
+        <div className="flex items-start justify-between w-[946px] mt-9">
+          <PowertrainTypesLegend className="max-w-[600px]" />
+          <HeatmapColorLegend
+            lowestTotalEmissionsPerMile={data.least_total_emissions_per_mile}
+            highestTotalEmissionsPerMile={data.highest_total_emissions_per_mile}
+            leastEmissionsVehicle={data.least_emissions_vehicle}
+            highestEmissionsVehicle={data.highest_emissions_vehicle}
+          />
+        </div>
+      ) : (
+        ""
+      )}
       <Card className="max-w-[946px] mt-9 bg-slate-50 bg-opacity-40">
         <CardHeader>
           <CardTitle className="text-base font-semibold">

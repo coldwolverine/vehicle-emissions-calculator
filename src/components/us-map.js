@@ -4,7 +4,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { getEmissionsData } from "@/actions/get-emissions-data";
-import geojsonData from "@/../data/georef-usa-county.json";
+import geojsonData from "@/../data/usa_counties.json";
+import otherGeojsonData from "@/../data/canada_mexico.json";
 import chroma from "chroma-js";
 import { Spinner } from "@/components/ui/spinner";
 import debounce from "lodash.debounce";
@@ -52,7 +53,6 @@ const USMap = ({
           secondVehicle &&
           secondPowertrain
         ) {
-          setLoading(true);
           getEmissionsData(
             firstVehicle,
             firstPowertrain,
@@ -93,12 +93,13 @@ const USMap = ({
             });
         }
       },
-      500
+      750
     ),
     []
   );
 
   useEffect(() => {
+    setLoading(true);
     fetchEmissionsData(
       firstVehicle,
       firstPowertrain,
@@ -108,6 +109,10 @@ const USMap = ({
       ufPhev50,
       cityDriving
     );
+
+    return () => {
+      fetchEmissionsData.cancel();
+    };
   }, [
     firstVehicle,
     firstPowertrain,
@@ -149,15 +154,25 @@ const USMap = ({
     };
   };
 
+  // [
+  //     "#d73027",
+  //     "#fc8d59",
+  //     "#fee090",
+  //     "#ffffbf",
+  //     "#e0f3f8",
+  //     "#91bfdb",
+  //     "#4575b4",
+  //   ]
+
   const colorPalette = chroma
     .scale([
       "#d73027",
       "#fc8d59",
-      "#fee090",
+      "#fee08b",
       "#ffffbf",
-      "#e0f3f8",
-      "#91bfdb",
-      "#4575b4",
+      "#d9ef8b",
+      "#91cf60",
+      "#1a9850",
     ])
     .domain([0, 1])
     .mode("lab")
@@ -300,6 +315,10 @@ const USMap = ({
                   />
                 </>
               )}
+              <GeoJSON
+                data={otherGeojsonData.features}
+                style={{ fillColor: "#808080", color: null, weight: 0 }}
+              />
               <HomeButton />
             </MapContainer>
           </div>
