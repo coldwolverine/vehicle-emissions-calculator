@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-export default function PowertrainTypesLegend() {
+export default function PowertrainTypesLegend({ className }) {
   return (
-    <Card className="mt-9 max-w-screen-md bg-blue-50">
+    <Card className={cn("max-w-screen-md bg-blue-50 bg-opacity-85", className)}>
       <CardHeader>
         <CardTitle className="text-lg font-semibold">
           Powertrain Types Legend
@@ -13,6 +14,10 @@ export default function PowertrainTypesLegend() {
           <div className="flex">
             <dt className="font-medium text-muted-foreground w-16">ICEV </dt>
             <dd className="w-full">Internal Combustion Engine Vehicle</dd>
+          </div>
+          <div className="flex">
+            <dt className="font-medium text-muted-foreground w-16">HEV </dt>
+            <dd className="w-full">Hybrid Electric Vehicle</dd>
           </div>
           <div className="flex">
             <dt className="font-medium text-muted-foreground w-16">PHEV</dt>

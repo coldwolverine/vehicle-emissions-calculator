@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { HeatMapGrid } from "react-grid-heatmap";
 import {
   Tooltip,
@@ -7,12 +7,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+// import {
+//   Accordion,
+//   AccordionContent,
+//   AccordionItem,
+//   AccordionTrigger,
+// } from "@/components/ui/accordion";
 import {
   Card,
   CardContent,
@@ -22,58 +22,40 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { getLifetimeMiles } from "@/utils/helpers";
-import PowertrainTypesLegend from "@/components/legend";
+import {
+  VEHICLE_DISPLAY_NAMES,
+  POWERTRAIN_DISPLAY_NAMES,
+  VEHICLE_DISPLAY_TO_DB,
+  POWERTRAIN_DISPLAY_TO_DB,
+  getLifetimeMiles,
+} from "@/utils/helpers.js";
+import PowertrainTypesLegend from "@/components/powertrain-legend";
+import HeatmapColorLegend from "@/components/heatmap-legend";
 
-const xLabels = [
-  "ICEV",
-  "HEV",
-  "PHEV35",
-  "PHEV50",
-  "BEV150",
-  "BEV200",
-  "BEV300",
-  "BEV400",
-];
+const VEHICLES = VEHICLE_DISPLAY_NAMES;
+const POWERTRAINS = POWERTRAIN_DISPLAY_NAMES;
 
-const powertrains = [
-  "ICEV",
-  "Par HEV SI",
-  "Par PHEV35",
-  "Par PHEV50",
-  "BEV150",
-  "BEV200",
-  "BEV300",
-  "BEV400",
-];
-
-const yLabels = [
-  "Pickup",
-  "Midsize SUV",
-  "Small SUV",
-  "Midsize Sedan",
-  "Compact Sedan",
-];
+// IMPORTANT: Axes are inverted in the heatmap functions
+// but the labels are in the correct order
 
 const EmissionsHeatmap = ({
-  heatmapData,
+  data,
   firstVehicle,
   firstPowertrain,
   secondVehicle,
   secondPowertrain,
   county,
   state,
+  isLoading,
 }) => {
   const [hoveredCell, setHoveredCell] = useState({ row: null, col: null });
-  const [data, setData] = useState({});
-  const [loading, setLoading] = useState(true);
 
   // Function to get total emissions per mile
   const getTotalEmissionsPerMile = (vehicle, powertrain) => {
     if (Object.keys(data).length === 0) {
       return 0; // Return 0 if data is undefined
     }
-    const key = `${vehicle}:${powertrain}`;
+    const key = `${VEHICLE_DISPLAY_TO_DB[vehicle]}:${POWERTRAIN_DISPLAY_TO_DB[powertrain]}`;
     return (
       Math.round(data.vehicle_data[key]?.Total_Emissions_per_mile_gCO2e) || 0
     );
@@ -90,13 +72,15 @@ const EmissionsHeatmap = ({
     if (Object.keys(data).length === 0) {
       return 0; // Return 0 if data is undefined
     }
-    const key = `${vehicle}:${powertrain}`;
+    const key = `${VEHICLE_DISPLAY_TO_DB[vehicle]}:${POWERTRAIN_DISPLAY_TO_DB[powertrain]}`;
     return (
       Math.round(data.vehicle_data[key]?.Production_phase_emissions_kgCO2e) || 0
     );
   };
 
-  const customCellRender = (y, x, value) => {
+  const customCellRender = (x, y, value) => {
+    const vehicle = VEHICLES[x];
+    const powertrain = POWERTRAINS[y];
     return (
       <>
         <TooltipProvider>
@@ -107,7 +91,7 @@ const EmissionsHeatmap = ({
                 onMouseLeave={() => setHoveredCell({ row: null, col: null })}
                 className="leading-[22px] h-full w-full text-center flex items-center justify-center flex-col"
               >
-                {getTotalEmissionsPerMile(yLabels[y], powertrains[x])}
+                {getTotalEmissionsPerMile(vehicle, powertrain)}
                 <br />
                 {value}%
               </div>
@@ -119,14 +103,14 @@ const EmissionsHeatmap = ({
             >
               <div className="flex">
                 <div>
-                  {yLabels[y]}, {powertrains[x]}
+                  {vehicle}, {powertrain}
                 </div>
               </div>
 
               <div className="flex items-center text-sm text-muted-foreground">
                 Total Lifecycle Emissions per mile
                 <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
-                  {getTotalEmissionsPerMile(yLabels[y], powertrains[x])}
+                  {getTotalEmissionsPerMile(vehicle, powertrain)}
                   <span className="ml-1 font-normal text-muted-foreground">
                     gCO<sub>2</sub>e
                   </span>
@@ -136,7 +120,7 @@ const EmissionsHeatmap = ({
               <div className="flex items-center text-sm text-muted-foreground">
                 Total Lifecycle Emissions
                 <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
-                  {getTotalEmissions(yLabels[y], powertrains[x])}
+                  {getTotalEmissions(vehicle, powertrain)}
                   <span className="ml-1 font-normal text-muted-foreground">
                     MTCO<sub>2</sub>e
                   </span>
@@ -146,7 +130,7 @@ const EmissionsHeatmap = ({
               <div className="flex items-center text-sm text-muted-foreground">
                 Emissions from Vehicle Cycle
                 <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
-                  {getVehicleCycleEmissions(yLabels[y], powertrains[x])}
+                  {getVehicleCycleEmissions(vehicle, powertrain)}
                   <span className="ml-1 font-normal text-muted-foreground">
                     MTCO<sub>2</sub>e
                   </span>
@@ -159,70 +143,35 @@ const EmissionsHeatmap = ({
     );
   };
 
-  useEffect(() => {
-    // Update heatmap based on heatmapData
-    console.log("Heatmap data changed:", heatmapData);
-    setLoading(true);
-    // Display skeleton while loading
-    setLoading(true);
-    if (Object.keys(heatmapData).length > 0) {
-      setData(heatmapData);
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
-    } else {
-      setData({});
-      // setTimeout(() => {
-      //   setLoading(false);
-      // }, 1000);
-    }
-  }, [heatmapData]);
-
   return (
     <div className="flex flex-col items-center">
-      {loading ? (
-        <div className="flex flex-col items-center w-full h-full space-y-2 my-48">
-          <Spinner size="md" />
-          <p>Loading Heatmap...</p>
-        </div>
-      ) : (
-        <Card className="max-w-screen-xl mx-auto bg-slate-50">
-          <CardHeader className="space-y-0 text-center">
-            <CardTitle className="text-lg">
-              Lifecycle Emissions across Vehicle Classes and Powertrains (gCO
-              <sub>2</sub>e/mile)
-            </CardTitle>
-            <CardDescription className="text-base">
-              % of Emissions Compared to{" "}
-              <span className="font-semibold">{firstVehicle}</span> with{" "}
-              <span className="font-semibold">{firstPowertrain}</span> in{" "}
-              <span className="font-semibold">
-                {county}, {state}
-              </span>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pl-10 pr-14">
+      <Card className="max-w-screen-xl mx-auto bg-slate-50">
+        <CardHeader className="space-y-0 text-center">
+          <CardTitle className="text-lg">
+            Lifecycle Emissions across Vehicle Classes and Powertrains (gCO
+            <sub>2</sub>e/mile)
+          </CardTitle>
+          <CardDescription className="text-base">
+            % of Emissions Compared to{" "}
+            <span className="font-semibold">{firstVehicle}</span> with{" "}
+            <span className="font-semibold">{firstPowertrain}</span> in{" "}
+            <span className="font-semibold">
+              {county}, {state}
+            </span>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pl-10 pr-14">
+          {isLoading ? ( // Show loading spinner if data is loading
+            <div className="flex flex-col items-center justify-center w-[850px] h-[538px] z-[10000]">
+              <Spinner size="md" />
+              <p>Loading Heatmap...</p>
+            </div>
+          ) : (
             <div className="flex flex-col items-center w-[850px] h-full ">
-              {/* <div className="flex flex-col p-3 pt-0 space-y-1 text-center mb-4">
-                <div>
-                  <span className="text-lg font-semibold tracking-tight">
-                    Lifecycle Emissions across Vehicle Classes and Powertrains{" "}
-                  </span>
-                  (gCO<sub>2</sub>e/mile)
-                </div>
-                <div className="text-[0.925rem] text-muted-foreground">
-                  % of Emissions Compared to{" "}
-                  <span className="font-semibold">{firstVehicle}</span> with{" "}
-                  <span className="font-semibold">{firstPowertrain}</span> in{" "}
-                  <span className="font-semibold">
-                    {county}, {state}
-                  </span>
-                </div>
-              </div> */}
               <HeatMapGrid
                 data={data.percentage_change}
-                xLabels={xLabels}
-                yLabels={yLabels}
+                xLabels={POWERTRAINS}
+                yLabels={VEHICLES}
                 xLabelsPos="bottom"
                 cellHeight="6rem"
                 square={true}
@@ -232,8 +181,8 @@ const EmissionsHeatmap = ({
                   lineHeight: "1",
                   marginRight: "1rem",
                   color: "#36363c",
-                  marginTop: "2.2rem",
-                  marginBottom: "2.2rem",
+                  marginTop: "2.3rem",
+                  marginBottom: "2.3rem",
                 })}
                 xLabelsStyle={() => ({
                   fontSize: "0.9rem",
@@ -242,12 +191,12 @@ const EmissionsHeatmap = ({
                   // color: "#52525b",
                 })}
                 cellRender={customCellRender}
-                cellStyle={(y, x, ratio) => {
+                cellStyle={(x, y, ratio) => {
                   const isTargetCell =
-                    (powertrains[x] === firstPowertrain &&
-                      yLabels[y] === firstVehicle) ||
-                    (powertrains[x] === secondPowertrain &&
-                      yLabels[y] === secondVehicle);
+                    (POWERTRAINS[y] === firstPowertrain &&
+                      VEHICLES[x] === firstVehicle) ||
+                    (POWERTRAINS[y] === secondPowertrain &&
+                      VEHICLES[x] === secondVehicle);
                   const isHoveredCell =
                     y === hoveredCell.col && x === hoveredCell.row;
                   // Map `ratio` to an HSL color from green (120) to red (0)
@@ -278,31 +227,60 @@ const EmissionsHeatmap = ({
                 }}
               />
             </div>
-          </CardContent>
+          )}
+        </CardContent>
+        {Object.keys(data).length > 0 ? (
           <CardFooter className="flex-col items-center gap-2 text-base">
-            <div className="gap-2 font-medium leading-none">
-              {data.least_emissions_vehicle} is the most efficient vehicle based
-              on lifecycle emissions per mile
-            </div>
-            <div className="leading-none text-muted-foreground">
-              Produces {data.least_total_emissions_per_mile.toFixed(2)} gC0
-              <sub>2</sub>e/mile, lowest among all vehicles
-            </div>
+            <>
+              <div className="gap-2 font-medium leading-none">
+                {data.least_emissions_vehicle} is the most efficient vehicle
+              </div>
+              <div className="leading-none text-muted-foreground">
+                Produces the lowest lifeycle emissions per mile of{" "}
+                {data.least_total_emissions_per_mile.toFixed(0)} gC0
+                <sub>2</sub>e/mile
+              </div>
+            </>
           </CardFooter>
-        </Card>
-      )}
-      <PowertrainTypesLegend />
-      <br />
+        ) : (
+          ""
+        )}
+      </Card>
+      <div className="flex items-start justify-between w-[946px] mt-9">
+        <PowertrainTypesLegend className="max-w-[600px]" />
+        <HeatmapColorLegend
+          lowestTotalEmissionsPerMile={data.least_total_emissions_per_mile}
+          highestTotalEmissionsPerMile={data.highest_total_emissions_per_mile}
+          leastEmissionsVehicle={data.least_emissions_vehicle}
+          highestEmissionsVehicle={data.highest_emissions_vehicle}
+        />
+      </div>
 
-      {/* <div className="h-[30px]"></div> */}
-      <Accordion
-        type="single"
-        defaultValue="item-1"
-        collapsible
-        className="w-[700px]"
-      >
+      <Card className="max-w-[946px] mt-9 bg-slate-50 bg-opacity-40">
+        <CardHeader>
+          <CardTitle className="text-base font-semibold">
+            Guidance for interpretation of results
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm">
+          The heatmap results show lifecycle greenhouse gas emissions (g CO
+          <sub>2</sub>e/mile) for each vehicle option, including all emissions
+          from manufacturing through disposal. Percentages compare emissions of
+          all vehicles against your selected baseline vehicle. <br />
+          <br />
+          <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-normal">
+            Percentage = (Emissions of compared vehicle / Emissions of first
+            vehicle)
+          </code>
+          <br />
+          <br />
+          Should compare the emissions per mile given the differences in mileage
+          across classes.
+        </CardContent>
+      </Card>
+      {/* <Accordion type="single" defaultValue="item-1" className="w-[768px] p-1">
         <AccordionItem value="item-1">
-          <AccordionTrigger className="">
+          <AccordionTrigger>
             Guidance for interpretation of results
           </AccordionTrigger>
           <AccordionContent>
@@ -321,7 +299,7 @@ const EmissionsHeatmap = ({
             mileage across classes.
           </AccordionContent>
         </AccordionItem>
-      </Accordion>
+      </Accordion> */}
     </div>
   );
 };

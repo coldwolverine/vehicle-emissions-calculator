@@ -46,7 +46,11 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { getCounties } from "@/actions/get-counties";
 import QuestionMarkPopover from "@/components/ui/question-mark-popover";
-import { getPowertrainDescription } from "@/utils/helpers";
+import {
+  VEHICLE_DISPLAY_NAMES,
+  POWERTRAIN_DISPLAY_NAMES,
+  getPowertrainDescription,
+} from "@/utils/helpers";
 
 const states = [
   "AL",
@@ -99,24 +103,8 @@ const states = [
   "WY",
 ];
 
-const vehicles = [
-  "Pickup",
-  "Midsize SUV",
-  "Small SUV",
-  "Midsize Sedan",
-  "Compact Sedan",
-];
-
-const powertrains = [
-  "ICEV",
-  "Par HEV SI",
-  "Par PHEV35",
-  "Par PHEV50",
-  "BEV150",
-  "BEV200",
-  "BEV300",
-  "BEV400",
-];
+const vehicles = VEHICLE_DISPLAY_NAMES;
+const powertrains = POWERTRAIN_DISPLAY_NAMES;
 
 const phev35UfDefault = 0.58;
 const phev50UfDefault = 0.69;
@@ -680,7 +668,9 @@ const VehicleComparisonForm = ({ form }) => {
           </Collapsible>
         </div>
 
-        {/* <Button type="submit">Submit</Button> */}
+        {/* <Button className="bg-[#00274C]" type="submit">
+          Submit
+        </Button> */}
       </form>
     </Form>
   );

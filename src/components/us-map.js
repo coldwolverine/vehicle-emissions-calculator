@@ -31,7 +31,7 @@ const USMap = ({
   const [maxEmissionsDifference, setMaxEmissionsDifference] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const mapCenter = [37.8, -96];
+  const mapCenter = [39.5, -98.35];
   const zoomLevel = 4.5;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,12 +83,9 @@ const USMap = ({
                 }
                 return feature;
               });
-              console.log(updatedData);
 
               setUpdatedGeojsonData(updatedData);
-              setTimeout(() => {
-                setLoading(false);
-              }, 1000);
+              setLoading(false);
             })
             .catch((error) => {
               console.error(error);
@@ -247,74 +244,68 @@ const USMap = ({
   };
 
   return (
-    <Card className="max-w-screen-xl mx-auto bg-slate-50">
-      <CardHeader className="space-y-0 text-center">
-        <CardTitle className="text-lg">
-          Lifecycle Emissions Difference per Mile by U.S. County (gCO
-          <sub>2</sub>e/mile)
-        </CardTitle>
-        <CardDescription className="text-base">
-          <span>Switching from</span>{" "}
-          <span className="font-bold">
-            {firstVehicle}, {firstPowertrain}
-          </span>{" "}
-          (Vehicle 1) to{" "}
-          <span className="font-bold">
-            {secondVehicle}, {secondPowertrain}
-          </span>{" "}
-          (Vehicle 2)
-          {/* <div>
-            <span className="font-bold">Vehicle 1:</span> {firstVehicle},{" "}
-            {firstPowertrain}
-          </div>
-          <div>
-            <span className="font-bold">Vehicle 2:</span> {secondVehicle},{" "}
-            {secondPowertrain}
-          </div> */}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[600px] w-[1050px]">
-          <MapContainer
-            center={mapCenter}
-            zoom={zoomLevel}
-            zoomSnap={0.5}
-            className="h-full w-full"
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />{" "}
-            {loading ? (
-              <div
-                className="flex flex-col items-center justify-center w-full h-full absolute inset-0 z-[10000]"
-                style={{
-                  backgroundColor: "rgba(255, 255, 255, 0.8)",
-                }}
-              >
-                <Spinner size="md" />
-                <p>Loading Map...</p>
-              </div>
-            ) : (
-              <>
-                {updatedGeojsonData && (
-                  <GeoJSON
-                    data={updatedGeojsonData.features}
-                    onEachFeature={onEachFeature}
-                    style={style}
-                  />
-                )}
-                <Legend
-                  minEmissionsDifference={minEmissionsDifference}
-                  maxEmissionsDifference={maxEmissionsDifference}
-                />
-              </>
-            )}
-            <HomeButton />
-          </MapContainer>
+    <div className="relative">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center z-0">
+          <p className="text-4xl font-bold text-gray-300">Loading...</p>
         </div>
-      </CardContent>{" "}
-    </Card>
+      )}
+      <Card className="relative z-10 max-w-screen-xl mx-auto bg-slate-50">
+        <CardHeader className="space-y-0 text-center">
+          <CardTitle className="text-lg">
+            Lifecycle Emissions Difference per Mile by U.S. County (gCO
+            <sub>2</sub>e/mile)
+          </CardTitle>
+          <CardDescription className="text-base">
+            <span>Switching from</span>{" "}
+            <span className="font-bold">
+              {firstVehicle}, {firstPowertrain}
+            </span>{" "}
+            (Vehicle 1) to{" "}
+            <span className="font-bold">
+              {secondVehicle}, {secondPowertrain}
+            </span>{" "}
+            (Vehicle 2)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[600px] w-[1050px]">
+            <MapContainer
+              center={mapCenter}
+              zoom={zoomLevel}
+              zoomSnap={0.5}
+              className="h-full w-full"
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />{" "}
+              {loading ? (
+                <div className="flex flex-col items-center justify-center w-full h-full absolute inset-0 z-[10000] bg-white bg-opacity-80">
+                  <Spinner size="md" />
+                  <p>Loading Map...</p>
+                </div>
+              ) : (
+                <>
+                  {updatedGeojsonData && (
+                    <GeoJSON
+                      data={updatedGeojsonData.features}
+                      onEachFeature={onEachFeature}
+                      style={style}
+                    />
+                  )}
+                  <Legend
+                    minEmissionsDifference={minEmissionsDifference}
+                    maxEmissionsDifference={maxEmissionsDifference}
+                  />
+                </>
+              )}
+              <HomeButton />
+            </MapContainer>
+          </div>
+        </CardContent>{" "}
+      </Card>
+    </div>
   );
 };
 

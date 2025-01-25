@@ -1,7 +1,11 @@
 "use server";
 
 import { Client } from "pg";
-import { getLifetimeMiles } from "@/utils/helpers.js";
+import {
+  VEHICLE_DISPLAY_TO_DB,
+  POWERTRAIN_DISPLAY_TO_DB,
+  getLifetimeMiles,
+} from "@/utils/helpers";
 
 export async function getEmissionsData(
   firstVehicle,
@@ -13,6 +17,12 @@ export async function getEmissionsData(
   cityPercentage = 0.57,
   cargoWeight = 0
 ) {
+  // Convert vehicle and powertrain names to database names
+  firstVehicle = VEHICLE_DISPLAY_TO_DB[firstVehicle];
+  firstPowertrain = POWERTRAIN_DISPLAY_TO_DB[firstPowertrain];
+  secondVehicle = VEHICLE_DISPLAY_TO_DB[secondVehicle];
+  secondPowertrain = POWERTRAIN_DISPLAY_TO_DB[secondPowertrain];
+
   // Connect to RDS database
   const client = new Client({
     user: process.env.PGUSER,
@@ -199,7 +209,7 @@ async function getEmissionsDifference(
     County,
     ROUND(first_emissions) AS first_emissions,
     ROUND(second_emissions) AS second_emissions,
-    ROUND(first_emissions - second_emissions) AS emissions_difference
+    ROUND(second_emissions - first_emissions) AS emissions_difference
   FROM
     emissions_difference
   ORDER BY County;

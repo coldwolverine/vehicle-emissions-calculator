@@ -2,7 +2,7 @@
 "use server";
 
 import sqlite3 from "sqlite3";
-import { runQuery } from "@/utils/helpers.js";
+import { runQuery } from "@/utils/helpers-sqlite.js";
 
 const VEHICLES = [
   "Pickup",

@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function Hero() {
   return (
     <>
@@ -15,7 +13,11 @@ export default function Hero() {
         based on your location and driving patterns. Lifecycle emissions include
         emissions from manufacturing, petroleum extraction and battery
         production (for electric vehicles), emissions from driving the vehicle
-        (use phase) and end-of-life disposal.
+        (use phase) and end-of-life disposal. The methodology is based on
+        research published in{" "}
+        <a href="#" className="text-blue-500 underline">
+          Smith et al., 2025.
+        </a>
       </p>
       <br />
 
@@ -27,12 +29,6 @@ export default function Hero() {
       </h2>
       <div className="h-[3px]" />
       <div className="leading-7 [&:not(:first-child)]:mt-6 mt-6">
-        {/* Begin by selecting your location and the two vehicle types you&apos;d
-        like to compare. You can customize driving patterns by adjusting the
-        city/highway split and electric driving percentage for PHEVs (Utility
-        Factor), or use our default settings based on EPA and SAE standards.
-        First, user must select location. Default are set for driving patterns
-        using EPA and SAE standards. You can modify city/highway… */}
         <div className="text-lg font-semibold tracking-tight mb-3">
           Instructions
         </div>
@@ -46,7 +42,7 @@ export default function Hero() {
             <b>Vehicle Comparison:</b> Compare two models by selecting:
             <ul className="ml-6 list-disc list-inside">
               <li>
-                <u>Class:</u> Compact/Midsize Sedan, Small/Midsize SUV, or
+                <u>Class:</u> Compact/Midsize Sedan, Crossover, Midsize SUV, or
                 Pickup
               </li>
               <li>
@@ -101,7 +97,7 @@ export default function Hero() {
         <i>upstream fuel production</i> and/or <i>electricity generation</i>.
         <br />
         <br />
-        Default calculations assume:
+        Default calculations are based on EPA and SAE standards, which assume:
         <ul className="ml-6 list-disc list-inside">
           <li>57% city / 43% highway driving split</li>
           <li>
@@ -122,13 +118,13 @@ export default function Hero() {
         into the analysis and based on grid intensity projections from
         NREL&apos;s Cambium model. For complete methodology details, please
         reference Smith et. al, 2025 (linked below). Please email us at{" "}
-        <Link
+        <a
           href="mailto:gregak@umich.edu"
           className="text-blue-500 underline"
-          target="external"
+          target="_blank"
         >
           gregak@umich.edu
-        </Link>{" "}
+        </a>{" "}
         to answer further questions or to provide feedback and suggestions for
         the tool.
       </div>

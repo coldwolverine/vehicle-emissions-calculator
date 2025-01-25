@@ -1,7 +1,8 @@
 "use server";
 
 import sqlite3 from "sqlite3";
-import { runQuery, getLifetimeMiles } from "@/utils/helpers.js";
+import { getLifetimeMiles } from "@/utils/helpers.js";
+import { runQuery } from "@/utils/helpers-sqlite.js";
 
 export async function getEmissionsData(
   firstVehicle,

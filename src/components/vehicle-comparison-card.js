@@ -13,7 +13,6 @@ import {
   LabelList,
   XAxis,
   YAxis,
-  ResponsiveContainer,
 } from "recharts";
 import {
   // ChartConfig,
@@ -21,20 +20,25 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { getLifetimeMiles } from "@/utils/helpers";
-import PowertrainTypesLegend from "@/components/legend";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  VEHICLE_DISPLAY_TO_DB,
+  POWERTRAIN_DISPLAY_TO_DB,
+  getLifetimeMiles,
+} from "@/utils/helpers.js";
+import PowertrainTypesLegend from "@/components/powertrain-legend";
 
 const CustomXAxisLabel = ({ viewBox }) => {
   const { width, height, x, y } = viewBox;
   return (
     <text
       x={x + width / 2}
-      y={y + height + 3}
+      y={y + height + 8}
       textAnchor="middle"
       fill="#666"
       className="text-sm"
     >
-      Total Lifecycle Emissions (MTCO
+      Total Lifecycle Emissions (Metric Tons CO
       <tspan baselineShift="sub" className="text-[10px]">
         2
       </tspan>
@@ -51,13 +55,14 @@ export default function TwoVehicleComparisonCard({
   secondPowertrain,
   county,
   state,
+  isLoading,
 }) {
   // Function to get total emissions per mile
   const getTotalEmissionsPerMile = (vehicle, powertrain) => {
     if (Object.keys(heatmapData).length === 0) {
       return 0; // Return 0 if data is undefined
     }
-    const key = `${vehicle}:${powertrain}`;
+    const key = `${VEHICLE_DISPLAY_TO_DB[vehicle]}:${POWERTRAIN_DISPLAY_TO_DB[powertrain]}`;
     return (
       Math.round(
         heatmapData.vehicle_data[key]?.Total_Emissions_per_mile_gCO2e
@@ -69,7 +74,7 @@ export default function TwoVehicleComparisonCard({
   const getTotalEmissions = (vehicle, powertrain) => {
     const totalEmissionsPerMile = getTotalEmissionsPerMile(vehicle, powertrain);
     const lifetimeMiles = getLifetimeMiles(vehicle);
-    return ((totalEmissionsPerMile * lifetimeMiles) / 1_000_000).toFixed(2);
+    return ((totalEmissionsPerMile * lifetimeMiles) / 1_000_000).toFixed(0);
   };
 
   // Calculate lifecycle emissions and difference
@@ -95,11 +100,6 @@ export default function TwoVehicleComparisonCard({
       emissions: vehicle2Emissions,
       fill: "var(--color-vehicle2)",
     },
-    // {
-    //   vehicle: "difference",
-    //   emissions: difference,
-    //   fill: "var(--color-difference)",
-    // },
   ];
 
   const chartConfig = {
@@ -114,10 +114,6 @@ export default function TwoVehicleComparisonCard({
       label: `${secondVehicle} ${secondPowertrain}`,
       color: "hsl(var(--chart-2))",
     },
-    difference: {
-      label: "Difference",
-      color: "hsl(var(--chart-3))",
-    },
   };
 
   return (
@@ -131,12 +127,17 @@ export default function TwoVehicleComparisonCard({
             In {county}, {state}
           </CardDescription>
         </CardHeader>
-        <CardContent className="">
-          <ChartContainer
-            config={chartConfig}
-            className="mx-auto h-[210px] w-full"
-          >
-            <ResponsiveContainer width="100%" height="100%">
+        {isLoading ? ( // Show loading spinner if data is loading
+          <div className="flex flex-col items-center justify-center w-full h-[210px] z-[10000]">
+            <Spinner size="md" />
+            <p>Loading Chart...</p>
+          </div>
+        ) : (
+          <CardContent className="">
+            <ChartContainer
+              config={chartConfig}
+              className="mx-auto h-[210px] w-full"
+            >
               <BarChart
                 accessibilityLayer
                 data={chartData}
@@ -144,8 +145,8 @@ export default function TwoVehicleComparisonCard({
                 margin={{
                   top: 0,
                   right: 50,
-                  bottom: 10,
-                  left: 0,
+                  bottom: 20,
+                  left: 10,
                 }}
               >
                 <CartesianGrid vertical={true} />
@@ -156,8 +157,11 @@ export default function TwoVehicleComparisonCard({
                   tickMargin={7}
                   axisLine={true}
                   tickFormatter={(value) => chartConfig[value]?.label}
-                  width={90}
-                  style={{ fill: "var(--color-foreground)" }}
+                  width={75}
+                  style={{
+                    fill: "#36363c",
+                    fontSize: "0.85rem",
+                  }}
                 />
                 <XAxis
                   dataKey="emissions"
@@ -176,12 +180,12 @@ export default function TwoVehicleComparisonCard({
                               "--color-bg": `var(--color-${item?.payload?.vehicle})`,
                             }}
                           />
-                          <div className="flex min-w-[170px] items-center text-xs text-muted-foreground">
+                          <div className="flex min-w-[220px] items-center text-xs text-muted-foreground">
                             {chartConfig[name]?.label || name}
                             <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
                               {value}
-                              <span className="ml-1 font-normal text-muted-foreground">
-                                MTCO<sub>2</sub>e
+                              <span className="ml-2 font-normal tracking-tight text-muted-foreground">
+                                Metric Tons CO<sub>2</sub>e
                               </span>
                             </div>
                           </div>
@@ -201,26 +205,33 @@ export default function TwoVehicleComparisonCard({
                   <LabelList
                     dataKey="emissions"
                     position="right"
-                    offset={8}
+                    offset={10}
                     className="fill-foreground"
-                    fontSize={12}
+                    fontSize={14}
                     formatter={(value) => `${value}`}
                   />
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
+            </ChartContainer>
+          </CardContent>
+        )}
         <CardFooter className="flex-col items-center gap-2 text-base">
-          <div className="flex gap-2 font-medium leading-none">
-            {leastEmissionsVehicle} produces lesser emissions over its lifecycle
-          </div>
-          <div className="leading-none text-muted-foreground">
-            By {Math.abs(difference)} MTCO<sub>2</sub>e
-          </div>
+          {isLoading ? (
+            " "
+          ) : (
+            <>
+              <div className="flex gap-2 font-medium leading-none">
+                {leastEmissionsVehicle} produces lesser emissions over its
+                lifecycle
+              </div>
+              <div className="leading-none text-muted-foreground">
+                By {Math.abs(difference)} Metric Tons CO<sub>2</sub>e
+              </div>
+            </>
+          )}
         </CardFooter>
       </Card>
-      <PowertrainTypesLegend />
+      <PowertrainTypesLegend className="mt-9" />
     </div>
   );
 }

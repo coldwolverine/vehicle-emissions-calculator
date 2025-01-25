@@ -6,7 +6,7 @@ import logo from "@/../public/css-logo-white-long.png";
 const Footer = () => {
   return (
     <footer className="bg-[#00274C] text-gray-200 py-8">
-      <div className="flex justify-center items-center gap-40">
+      <div className="flex justify-center items-center gap-40 text-lg max-w-screen-lg mx-auto">
         <div className="flex justify-center space-x-12">
           <Link
             href="mailto:gregak@umich.edu"

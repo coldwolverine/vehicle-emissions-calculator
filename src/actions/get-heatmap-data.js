@@ -2,26 +2,16 @@
 "use server";
 
 import { Client } from "pg";
-import { getLifetimeMiles } from "@/utils/helpers.js";
+import {
+  VEHICLE_DISPLAY_TO_DB,
+  VEHICLE_DB_NAMES,
+  POWERTRAIN_DISPLAY_TO_DB,
+  POWERTRAIN_DB_NAMES,
+  getLifetimeMiles,
+} from "@/utils/helpers.js";
 
-const VEHICLES = [
-  "Pickup",
-  "Midsize SUV",
-  "Small SUV",
-  "Midsize Sedan",
-  "Compact Sedan",
-];
-
-const POWERTRAINS = [
-  "ICEV",
-  "Par HEV SI",
-  "Par PHEV35",
-  "Par PHEV50",
-  "BEV150",
-  "BEV200",
-  "BEV300",
-  "BEV400",
-];
+const VEHICLES = VEHICLE_DB_NAMES;
+const POWERTRAINS = POWERTRAIN_DB_NAMES;
 
 export async function getHeatmapData(
   state,
@@ -33,6 +23,10 @@ export async function getHeatmapData(
   cityDrivingPercentage,
   cargoWeight = 0
 ) {
+  // Convert firstVehicle and firstPowertrain to their database names
+  firstVehicle = VEHICLE_DISPLAY_TO_DB[firstVehicle];
+  firstPowertrain = POWERTRAIN_DISPLAY_TO_DB[firstPowertrain];
+
   // Connect to RDS database
   const client = new Client({
     user: process.env.PGUSER,
@@ -47,6 +41,7 @@ export async function getHeatmapData(
 
   try {
     await client.connect();
+    // const client = await pool.connect();
 
     const fipsData = await client.query(
       'SELECT * FROM temp_data WHERE "State Abr." = $1 AND "County name" = $2 ',
@@ -60,21 +55,14 @@ export async function getHeatmapData(
       throw new Error("Error: FIPS code not found");
     }
 
-    const phevs = ["Par PHEV35", "Par PHEV50"];
-    let phevData = [];
-
-    for (const phev of phevs) {
-      const data = await getPhevData(
-        client,
-        fipsCode,
-        cargoWeight,
-        phev,
-        phev === "Par PHEV35" ? ufPHEV35 : ufPHEV50,
-        cityDrivingPercentage
-      );
-      phevData = [...phevData, ...data];
-      // console.log(`[API] Retreived ${phev} data.`);
-    }
+    const phevData = await getPhevData(
+      client,
+      fipsCode,
+      cargoWeight,
+      ufPHEV35,
+      ufPHEV50,
+      cityDrivingPercentage
+    );
 
     const nonPhevData = await getNonPhevData(
       client,
@@ -94,33 +82,45 @@ export async function getHeatmapData(
     );
     // console.log("[API] Computed percentage change data ");
     // console.log(percentageChange);
-    let mostEfficientVehicle = null;
-    let mostEfficentTotalEmissionsPerMile = Infinity;
+
+    let leastEmissionsVehicle = null;
+    let leastTotalEmissionsPerMile = Infinity;
+
+    let mostEmissionsVehicle = null;
+    let mostTotalEmissionsPerMile = 0;
 
     const combinedDataDict = combinedData.reduce((acc, item) => {
       const key = `${item.Vehicle_Type}:${item.PowerTrain}`;
-      if (
-        item.Total_Emissions_per_mile_gCO2e < mostEfficentTotalEmissionsPerMile
-      ) {
-        mostEfficientVehicle = `${item.Vehicle_Type} with ${item.PowerTrain}`;
-        mostEfficentTotalEmissionsPerMile = item.Total_Emissions_per_mile_gCO2e;
+
+      // set the least emissions vehicle
+      if (item.Total_Emissions_per_mile_gCO2e < leastTotalEmissionsPerMile) {
+        leastEmissionsVehicle = `${item.Vehicle_Type} ${item.PowerTrain}`;
+        leastTotalEmissionsPerMile = item.Total_Emissions_per_mile_gCO2e;
       }
+
+      // set the most emissions vehicle
+      if (item.Total_Emissions_per_mile_gCO2e > mostTotalEmissionsPerMile) {
+        mostEmissionsVehicle = `${item.Vehicle_Type} ${item.PowerTrain}`;
+        mostTotalEmissionsPerMile = item.Total_Emissions_per_mile_gCO2e;
+      }
+
+      // Add the vehicle data to the dictionary
       acc[key] = {
         Total_Emissions_per_mile_gCO2e: item.Total_Emissions_per_mile_gCO2e,
         Production_phase_emissions_kgCO2e:
           +item.Production_phase_emissions_kgCO2e,
-        // Add other properties if needed
       };
       return acc;
     }, {});
-    console.log(mostEfficientVehicle);
 
     // Return the heatmap data
     return {
       percentage_change: percentageChange,
       vehicle_data: combinedDataDict,
-      least_emissions_vehicle: mostEfficientVehicle,
-      least_total_emissions_per_mile: mostEfficentTotalEmissionsPerMile,
+      least_emissions_vehicle: leastEmissionsVehicle,
+      least_total_emissions_per_mile: leastTotalEmissionsPerMile,
+      highest_total_emissions_per_mile: mostTotalEmissionsPerMile,
+      highest_emissions_vehicle: mostEmissionsVehicle,
     };
   } catch {
     // console.error(error);
@@ -131,104 +131,113 @@ export async function getHeatmapData(
   }
 }
 
-function interpolateEmissions(
-  cityEmissions,
-  highwayEmissions,
-  cityDrivingPercentage
-) {
-  return (
-    cityDrivingPercentage * cityEmissions +
-    (1 - cityDrivingPercentage) * highwayEmissions
-  );
-}
-
-function calculatePhevEmissions(csEmissions, cdEmissions, uf) {
-  return uf * cdEmissions + (1 - uf) * csEmissions;
-}
-
-// phev = "Par PHEV35", "Par PHEV50"
-// uf = ufPHEV35 or ufPHEV50
 async function getPhevData(
   client,
   fipsCode,
   cargoWeight,
-  phev,
-  uf,
+  ufPhev35,
+  ufPhev50,
   cityDrivingPercentage
 ) {
-  let phevData = [];
-  const result = await client.query(
-    `SELECT
-      "Vehicle_Type" , CAST("Use_Phase_Emissions" AS FLOAT),
-      CAST("Production_phase_emissions_kgCO2e" AS FLOAT), "Utility_Factor"
-    FROM city_data
-    WHERE "County" = CAST($1 AS VARCHAR) AND "Cargo" = CAST($2 AS VARCHAR) AND "PowerTrain" = $3`,
-    [fipsCode, cargoWeight, phev]
-  );
-  const cityPhevData = result.rows;
-  // console.log(cityPhevData);
+  const query = `
+    WITH combined_data AS (
+    SELECT
+        fc."Vehicle_Type",
+        fc."PowerTrain",
+        fc."Utility_Factor",
+        fc."County",
+        CAST(fc."Production_phase_emissions_kgCO2e" AS FLOAT) "City_Production_phase_emissions_kgCO2e",
+        CAST(fc."Use_Phase_Emissions" AS FLOAT) AS "City_Use_Phase_Emissions",
+        CAST(fh."Production_phase_emissions_kgCO2e" AS FLOAT) AS "Highway_Production_phase_emissions_kgCO2e",
+        CAST(fh."Use_Phase_Emissions" AS FLOAT) AS "Highway_Use_Phase_Emissions",
+        ROW_NUMBER() OVER (PARTITION BY fc."Vehicle_Type", fc."PowerTrain", fc."Utility_Factor", fc."County") AS row_num
+    FROM
+        "city_data" AS fc
+    LEFT JOIN
+        "highway_data" AS fh
+    ON
+        fc."Vehicle_Type" = fh."Vehicle_Type"
+        AND fc."PowerTrain" = fh."PowerTrain"
+        AND fc."County" = fh."County"
+        AND fc."Cargo" = fh."Cargo"
+        AND fc."Utility_Factor" = fh."Utility_Factor"
+    WHERE 
+        fc."County" = CAST($1 AS VARCHAR)
+        AND fc."Cargo" = CAST($2 AS VARCHAR)
+        AND fc."PowerTrain" IN ('Par PHEV35', 'Par PHEV50')
+        AND fc."Utility_Factor" IN ('0', '1')
+  ),
+  phev_data AS (
+    SELECT
+      id.*,
+      CASE
+        WHEN id."Utility_Factor" = '1' THEN
+          (CASE
+            WHEN id."PowerTrain" = 'Par PHEV35'
+              THEN (CAST($3 AS FLOAT) * id."City_Use_Phase_Emissions" +
+              (1 - CAST($3 AS FLOAT)) * LEAD(id."City_Use_Phase_Emissions") OVER (PARTITION BY id."Vehicle_Type", id."PowerTrain", id."County" ORDER BY id."Utility_Factor" DESC))
+            WHEN id."PowerTrain" = 'Par PHEV50'
+              THEN (CAST($4 AS FLOAT) * id."City_Use_Phase_Emissions" +
+              (1 - CAST($4 AS FLOAT)) * LEAD(id."City_Use_Phase_Emissions") OVER (PARTITION BY id."Vehicle_Type", id."PowerTrain", id."County" ORDER BY id."Utility_Factor" DESC))
+          END)
+        ELSE NULL
+      END AS new_city_use_phase_emissions,
+      CASE
+        WHEN id."Utility_Factor" = '1' THEN
+          (CASE
+            WHEN id."PowerTrain" = 'Par PHEV35'
+              THEN (CAST($3 AS FLOAT) * id."Highway_Use_Phase_Emissions" +
+              (1 - CAST($3 AS FLOAT)) * LEAD(id."Highway_Use_Phase_Emissions") OVER (PARTITION BY id."Vehicle_Type", id."PowerTrain", id."County" ORDER BY id."Utility_Factor" DESC))
+            WHEN id."PowerTrain" = 'Par PHEV50'
+              THEN (CAST($4 AS FLOAT) * id."Highway_Use_Phase_Emissions" +
+              (1 - CAST($4 AS FLOAT)) * LEAD(id."Highway_Use_Phase_Emissions") OVER (PARTITION BY id."Vehicle_Type", id."PowerTrain", id."County" ORDER BY id."Utility_Factor" DESC))
+          END)
+        ELSE NULL
+      END AS new_highway_use_phase_emissions
+    FROM
+      combined_data AS id
+    WHERE
+      id.row_num = 1 AND 
+      id."PowerTrain" IN ('Par PHEV35', 'Par PHEV50')
+      AND id."Utility_Factor" IN ('0', '1')
+  ),
+  interpolated_data AS (
+    SELECT
+      *,
+      (CAST ($5 AS FLOAT) * new_city_use_phase_emissions + (1 - CAST($5 AS FLOAT)) * new_highway_use_phase_emissions) AS new_use_phase_emissions
+    FROM phev_data
+    WHERE
+      new_city_use_phase_emissions IS NOT NULL
+      OR new_highway_use_phase_emissions IS NOT NULL
+  )
+  SELECT
+      "Vehicle_Type",
+      "PowerTrain",
+      "City_Production_phase_emissions_kgCO2e" as "Production_phase_emissions_kgCO2e",
+      (new_use_phase_emissions + "City_Production_phase_emissions_kgCO2e") /
+        CASE
+          WHEN "Vehicle_Type" IN ('Compact Sedan', 'Midsize Sedan')
+            THEN CAST($6 AS FLOAT)
+          WHEN "Vehicle_Type" IN ('Small SUV', 'Midsize SUV')
+            THEN CAST($7 AS FLOAT)
+          WHEN "Vehicle_Type" = 'Pickup'
+            THEN CAST($8 AS FLOAT)
+          ELSE NULL
+        END * 1000000 AS "Total_Emissions_per_mile_gCO2e"
+    FROM interpolated_data;
+  `;
 
-  const result2 = await client.query(
-    `SELECT
-      "Vehicle_Type", CAST("Use_Phase_Emissions" AS FLOAT),
-      CAST("Production_phase_emissions_kgCO2e" AS FLOAT), "Utility_Factor"
-    FROM highway_data
-    WHERE "County" = CAST($1 AS VARCHAR) AND "Cargo" = CAST($2 AS VARCHAR) AND "PowerTrain" = $3`,
-    [fipsCode, cargoWeight, phev]
-  );
-  const highwayPhevData = result2.rows;
-
-  for (const vehicle of VEHICLES) {
-    // Process city data
-    // + converts string to int
-    const cityCd = +cityPhevData.find(
-      (v) => v.Vehicle_Type === vehicle && v.Utility_Factor === "1"
-    )?.Use_Phase_Emissions;
-    const cityCs = +cityPhevData.find(
-      (v) => v.Vehicle_Type === vehicle && v.Utility_Factor === "0"
-    )?.Use_Phase_Emissions;
-
-    // Process highway data
-    const highwayCd = +highwayPhevData.find(
-      (v) => v.Vehicle_Type === vehicle && v.Utility_Factor === "1"
-    )?.Use_Phase_Emissions;
-    const highwayCs = +highwayPhevData.find(
-      (v) => v.Vehicle_Type === vehicle && v.Utility_Factor === "0"
-    )?.Use_Phase_Emissions;
-
-    if (cityCd && cityCs && highwayCd && highwayCs) {
-      // Apply UF interpolation separately for city and highway
-      const cityUsePhase = calculatePhevEmissions(cityCs, cityCd, uf);
-      const highwayUsePhase = calculatePhevEmissions(highwayCs, highwayCd, uf);
-
-      // Interpolate between city and highway
-      const finalUsePhase = interpolateEmissions(
-        cityUsePhase,
-        highwayUsePhase,
-        cityDrivingPercentage
-      );
-
-      // Get production phase emissions
-      const productionEmissions = +cityPhevData.find(
-        (v) => v.Vehicle_Type === vehicle && v.Utility_Factor === "1"
-      )?.Production_phase_emissions_kgCO2e;
-
-      // Get lifetime miles
-      const lifetimeMiles = getLifetimeMiles(vehicle);
-
-      // Calculate final emissions in gCO2e/mile
-      const totalEmissions =
-        ((finalUsePhase + productionEmissions) / lifetimeMiles) * 1000000;
-      // Store the result
-      phevData.push({
-        Vehicle_Type: vehicle,
-        PowerTrain: phev,
-        Total_Emissions_per_mile_gCO2e: totalEmissions,
-        Production_phase_emissions_kgCO2e: productionEmissions,
-      });
-    }
-  }
-  return phevData;
+  const phevData = await client.query(query, [
+    fipsCode,
+    cargoWeight,
+    ufPhev35,
+    ufPhev50,
+    cityDrivingPercentage,
+    getLifetimeMiles("Compact Sedan"),
+    getLifetimeMiles("Small SUV"),
+    getLifetimeMiles("Pickup"),
+  ]);
+  return phevData.rows;
 }
 
 async function getNonPhevData(
