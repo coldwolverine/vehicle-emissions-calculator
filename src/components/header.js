@@ -7,7 +7,7 @@ const Header = () => {
   return (
     <header className="bg-[#00274C] mb-1 pb-2">
       {/* Main Header Content */}
-      <div className="mt-8 flex items-center justify-center max-w-screen-md mx-auto gap-8">
+      <div className="mt-9 flex items-center justify-center max-w-screen-md mx-auto gap-8">
         {/* Logo */}
         <a
           href="https://css.umich.edu/"

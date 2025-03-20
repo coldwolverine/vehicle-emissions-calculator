@@ -86,7 +86,7 @@ export default function Hero() {
         id="model-info"
         className="scroll-m-8 border-b pb-2 mb-0 text-2xl font-semibold tracking-tight first:mt-0"
       >
-        Model Information
+        Calculation Details
       </h2>
       <div className="h-[3px]" />
       <div className="leading-7 [&:not(:first-child)]:mt-6 mt-6">

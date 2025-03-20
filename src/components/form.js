@@ -155,7 +155,7 @@ const VehicleComparisonForm = ({ form }) => {
         <div className="space-y-0 mb-10">
           <h4 className="scroll-m-20 text-lg font-semibold tracking-tight  flex items-center gap-1">
             Location
-            <QuestionMarkPopover
+            {/* <QuestionMarkPopover
               content={
                 <p>
                   This tool accounts for regional variation in temperature
@@ -165,7 +165,7 @@ const VehicleComparisonForm = ({ form }) => {
                   Smith et. al.
                 </p>
               }
-            />
+            /> */}
           </h4>
           <div className="text-muted-foreground text-sm">
             Enter location data
@@ -303,9 +303,10 @@ const VehicleComparisonForm = ({ form }) => {
             <QuestionMarkPopover
               content={
                 <p>
-                  The following vehicle powertrains can be chosen for
-                  comparison: <br />
+                  {/* The following vehicle powertrains can be chosen for
+                  comparison: <br /> */}
                   <b>ICEV</b>: Internal Combustion Engine Vehicle <br />
+                  <b>HEV</b>: Hybrid Electric Vehicle <br />
                   <b>PHEV</b>: Plug-in Hybrid Electric Vehicle with ranges of 35
                   miles (PHEV35) or 50 miles (PHEV50) in electric mode <br />
                   <b>BEV</b>: Battery Electric Vehicle with ranges of -150,
@@ -501,15 +502,14 @@ const VehicleComparisonForm = ({ form }) => {
                   render={({ field }) => (
                     <FormItem className="space-y-0">
                       <FormLabel className="flex items-center gap-2">
-                        PHEV 35 UF
+                        PHEV 35 Utility Factor
                         <QuestionMarkPopover
                           content={
                             <p>
                               The percentage of miles driven using electric
                               power in Plug-in Hybrid Electric Vehicles (PHEVs).
-                              Per SAE standards, we use the following defaults :
-                              PHEVs with 35-mile electric range have a utility
-                              factor of 58% electric driving.
+                              Per SAE standards, we default to 58% for PHEVs
+                              with 35-mile range.
                             </p>
                           }
                         />
@@ -557,14 +557,14 @@ const VehicleComparisonForm = ({ form }) => {
                   render={({ field }) => (
                     <FormItem className="space-y-0">
                       <FormLabel className="flex items-center gap-2">
-                        PHEV 50 UF
+                        PHEV 50 Utility Factor
                         <QuestionMarkPopover
                           content={
                             <p>
                               The percentage of miles driven using electric
                               power in Plug-in Hybrid Electric Vehicles (PHEVs).
-                              Per SAE standards, we use the following defaults :
-                              PHEVs with 50-mile range achieve 69%.
+                              Per SAE standards, we default to 69% for PHEVs
+                              with 50-mile range.
                             </p>
                           }
                         />
@@ -622,7 +622,7 @@ const VehicleComparisonForm = ({ form }) => {
                               consumption and emissions compared to highway
                               driving, characterized by consistent higher
                               speeds, fewer stops, and more steady-state
-                              operation
+                              operation.
                             </p>
                           }
                         />
