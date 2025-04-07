@@ -40,7 +40,6 @@
     "react-leaflet": "^5.0.0-rc.1",
     "react-tooltip": "^5.28.0",
     "recharts": "^2.15.0",
-    "sqlite3": "^5.1.7",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
