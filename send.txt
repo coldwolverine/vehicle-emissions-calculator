@@ -1,31 +1,39 @@
-rsync -avz --progress --exclude 'node_modules' --exclude '.git' --exclude '.env' --exclude 'data/' \
--e "ssh -i ~/.ssh/emissions-dashboard.pem" \
-package.json ubuntu@ec2-3-145-77-104.us-east-2.compute.amazonaws.com:~/app
 
-pm2 start npm --name "nextjs-app" -- start
-
+I. Old Database 
 brew services start postgresql@14
 psql -h emissions-db.cri8o6ysc69n.us-east-2.rds.amazonaws.com -p 5432 -U postgres -d emissions -f export.sql
-1iztZaoN8iyoUfjqJWTn
-
-/opt/homebrew//var/postgresql@14/pg_hba.conf
 
 pg_restore -h emissions-db.cri8o6ysc69n.us-east-2.rds.amazonaws.com -U postgres -d emissions -v export.pg
+ /opt/homebrew/Cellar/libpq/17.4_1/bin/pg_restore -h emissions-db.cri8o6ysc69n.us-east-2.rds.amazonaws.com -U postgres -d emissions -v export.pg
 
+psql -h emissions-database.cfsq2moqs5f8.us-east-2.rds.amazonaws.com -p 5432 -U postgres -d emissions -f export.sql
+PGPASSWORD=postgres psql -U postgres -h emissions-database.cfsq2moqs5f8.us-east-2.rds.amazonaws.com -d emissions
 
-psql -U postgres -d updated_local_emissions_db -c "CREATE TABLE IF NOT EXISTS city_data("\id\", \"County\" VARCHAR, \"Vehicle_Type\" VARCHAR, \"PowerTrain\" VARCHAR, \"Utility_Factor\" VARCHAR, \"Cargo\" VARCHAR, \"adj_MPG_city\" VARCHAR, \"adj_WH_city\" VARCHAR, \"adj_MPG_HW\" VARCHAR, \"adj_WH_HW\" VARCHAR, \"FRV_City_MPG\" VARCHAR, \"FRV_City_WH\" VARCHAR, \"FRV_HW_MPG\" VARCHAR, \"FRV_HW_WH\" VARCHAR, \"Use_Phase_Emissions\" VARCHAR, \"Production_phase_emissions_kgCO2e\" VARCHAR, \"Total_Emissions_kgCO2e\" VARCHAR, \"Total_Emissions_per_mile_gCO2e\" VARCHAR);"
-psql -U postgres -d updated_local_emissions_db -c "\copy city_data (\"id\", \"County\", \"Vehicle_Type\", \"PowerTrain\", \"Utility_Factor\", \"Cargo\", \"adj_MPG_city\", \"adj_WH_city\", \"adj_MPG_HW\", \"adj_WH_HW\", \"FRV_City_MPG\", \"FRV_City_WH\", \"FRV_HW_MPG\", \"FRV_HW_WH\", \"Use_Phase_Emissions\", \"Production_phase_emissions_kgCO2e\", \"Total_Emissions_kgCO2e\", \"Total_Emissions_per_mile_gCO2e\") FROM 'AA_City_Class_mix_with_cargo_average_(2025-02-25).csv' DELIMITER ',' CSV HEADER;"
+PGPASSWORD=postgres /opt/homebrew/Cellar/libpq/17.4_1/bin/pg_restore -h emissions-database.cfsq2moqs5f8.us-east-2.rds.amazonaws.com -U postgres -d emissions -v export.pg
 
-psql -U postgres -d updated_local_emissions_db -c  "CREATE TABLE IF NOT EXISTS highway_data(\"id\" VARCHAR, \"County\" VARCHAR, \"Vehicle_Type\" VARCHAR, \"PowerTrain\" VARCHAR,\"Utility_Factor\" VARCHAR, \"Cargo\" VARCHAR, \"adj_MPG_city\" VARCHAR, \"adj_WH_city\" VARCHAR,\"adj_MPG_HW\" VARCHAR, \"adj_WH_HW\" VARCHAR, \"FRV_City_MPG\" VARCHAR, \"FRV_City_WH\" VARCHAR,\"FRV_HW_MPG\" VARCHAR, \"FRV_HW_WH\" VARCHAR, \"Use_Phase_Emissions\" VARCHAR, \"Production_phase_emissions_kgCO2e\" VARCHAR,\"Total_Emissions_kgCO2e\" VARCHAR, \"Total_Emissions_per_mile_gCO2e\" VARCHAR);"
-psql -U postgres -d updated_local_emissions_db -c  "\copy highway_data(\"id\" , \"County\" , \"Vehicle_Type\" , \"PowerTrain\" ,\"Utility_Factor\" , \"Cargo\" , \"adj_MPG_city\" , \"adj_WH_city\" ,\"adj_MPG_HW\" , \"adj_WH_HW\" , \"FRV_City_MPG\" , \"FRV_City_WH\" ,\"FRV_HW_MPG\" , \"FRV_HW_WH\" , \"Use_Phase_Emissions\" , \"Production_phase_emissions_kgCO2e\" ,\"Total_Emissions_kgCO2e\" , \"Total_Emissions_per_mile_gCO2e\" ) FROM 'AA_Highway_Class_mix_with_cargo_average_(2025-02-25).csv' DELIMITER ',' CSV HEADER; "
+II. New Database
 
-psql -U postgres -d updated_local_emissions_db -c "CREATE TABLE IF NOT EXISTS temp_data(\"join_id\" VARCHAR, \"FIPS code\" VARCHAR, \"State Abr.\" VARCHAR, \"BA Code\" VARCHAR, \"County name\" VARCHAR, \"CBSA title\" VARCHAR, \"CBSA 2012 pop\" VARCHAR, \"County 2012 pop\" VARCHAR, \"2013 code\" VARCHAR, \"2006 code\" VARCHAR, \"1990-based code\" VARCHAR, \"Division_number\" VARCHAR, \"ICEV_temp_adj_tempoary$total_adj\" VARCHAR, \"HEV_temp_adj_tempoary$total_adj\" VARCHAR, \"BEV_temp_adj_tempoary$total_adj\" VARCHAR);"
-psql -U postgres -d updated_local_emissions_db -c "\copy temp_data(\"join_id\" , \"FIPS code\" , \"State Abr.\" , \"BA Code\" , \"County name\" , \"CBSA title\" , \"CBSA 2012 pop\" , \"County 2012 pop\" , \"2013 code\" , \"2006 code\" , \"1990-based code\" , \"Division_number\" , \"ICEV_temp_adj_tempoary$total_adj\" , \"HEV_temp_adj_tempoary$total_adj\" , \"BEV_temp_adj_tempoary$total_adj\" ) FROM 'Temperature_and_urban_adjustments_by_fips_(2024-07-26).csv' DELIMITER ',' CSV HEADER; ;"
+- To connect to the RDS instance as master user postgres and create database
+PGPASSWORD=postgres psql -U postgres -h emissions-database.cfsq2moqs5f8.us-east-2.rds.amazonaws.com -d emissions
+psql-> create database emissions;
 
-find /opt/homebrew -name pg_dump 2>/dev/null
- /opt/homebrew/Cellar/libpq/17.4_1/bin/pg_dump -U postgres -d updated_local_emissions_db  -Fc -f export.pg
-pg_dump -U postgres -d updated_local_emissions_db  -Fc -f export.pg
+ - Use export_pg to load all the data into the database "emissions"
+PGPASSWORD=postgres /opt/homebrew/Cellar/libpq/17.4_1/bin/pg_restore -h emissions-database.cfsq2moqs5f8.us-east-2.rds.amazonaws.com -U postgres -d emissions -v export.pg
 
+- To create a export.pg file to load data into the database
+  1. Create a local database on your computer in postgresql using psql
+    psql -U postgres -d updated_local_emissions_db -c "CREATE TABLE IF NOT EXISTS city_data("\id\", \"County\" VARCHAR, \"Vehicle_Type\" VARCHAR, \"PowerTrain\" VARCHAR, \"Utility_Factor\" VARCHAR, \"Cargo\" VARCHAR, \"adj_MPG_city\" VARCHAR, \"adj_WH_city\" VARCHAR, \"adj_MPG_HW\" VARCHAR, \"adj_WH_HW\" VARCHAR, \"FRV_City_MPG\" VARCHAR, \"FRV_City_WH\" VARCHAR, \"FRV_HW_MPG\" VARCHAR, \"FRV_HW_WH\" VARCHAR, \"Use_Phase_Emissions\" VARCHAR, \"Production_phase_emissions_kgCO2e\" VARCHAR, \"Total_Emissions_kgCO2e\" VARCHAR, \"Total_Emissions_per_mile_gCO2e\" VARCHAR);"
+    psql -U postgres -d updated_local_emissions_db -c "\copy city_data (\"id\", \"County\", \"Vehicle_Type\", \"PowerTrain\", \"Utility_Factor\", \"Cargo\", \"adj_MPG_city\", \"adj_WH_city\", \"adj_MPG_HW\", \"adj_WH_HW\", \"FRV_City_MPG\", \"FRV_City_WH\", \"FRV_HW_MPG\", \"FRV_HW_WH\", \"Use_Phase_Emissions\", \"Production_phase_emissions_kgCO2e\", \"Total_Emissions_kgCO2e\", \"Total_Emissions_per_mile_gCO2e\") FROM 'AA_City_Class_mix_with_cargo_average_(2025-02-25).csv' DELIMITER ',' CSV HEADER;"
 
+    psql -U postgres -d updated_local_emissions_db -c  "CREATE TABLE IF NOT EXISTS highway_data(\"id\" VARCHAR, \"County\" VARCHAR, \"Vehicle_Type\" VARCHAR, \"PowerTrain\" VARCHAR,\"Utility_Factor\" VARCHAR, \"Cargo\" VARCHAR, \"adj_MPG_city\" VARCHAR, \"adj_WH_city\" VARCHAR,\"adj_MPG_HW\" VARCHAR, \"adj_WH_HW\" VARCHAR, \"FRV_City_MPG\" VARCHAR, \"FRV_City_WH\" VARCHAR,\"FRV_HW_MPG\" VARCHAR, \"FRV_HW_WH\" VARCHAR, \"Use_Phase_Emissions\" VARCHAR, \"Production_phase_emissions_kgCO2e\" VARCHAR,\"Total_Emissions_kgCO2e\" VARCHAR, \"Total_Emissions_per_mile_gCO2e\" VARCHAR);"
+    psql -U postgres -d updated_local_emissions_db -c  "\copy highway_data(\"id\" , \"County\" , \"Vehicle_Type\" , \"PowerTrain\" ,\"Utility_Factor\" , \"Cargo\" , \"adj_MPG_city\" , \"adj_WH_city\" ,\"adj_MPG_HW\" , \"adj_WH_HW\" , \"FRV_City_MPG\" , \"FRV_City_WH\" ,\"FRV_HW_MPG\" , \"FRV_HW_WH\" , \"Use_Phase_Emissions\" , \"Production_phase_emissions_kgCO2e\" ,\"Total_Emissions_kgCO2e\" , \"Total_Emissions_per_mile_gCO2e\" ) FROM 'AA_Highway_Class_mix_with_cargo_average_(2025-02-25).csv' DELIMITER ',' CSV HEADER; "
 
-psql -U postgres -d updated_local_emissions_db -c "ALTER TABLE highway_data DROP COLUMN id;"
+    psql -U postgres -d updated_local_emissions_db -c "CREATE TABLE IF NOT EXISTS temp_data(\"join_id\" VARCHAR, \"FIPS code\" VARCHAR, \"State Abr.\" VARCHAR, \"BA Code\" VARCHAR, \"County name\" VARCHAR, \"CBSA title\" VARCHAR, \"CBSA 2012 pop\" VARCHAR, \"County 2012 pop\" VARCHAR, \"2013 code\" VARCHAR, \"2006 code\" VARCHAR, \"1990-based code\" VARCHAR, \"Division_number\" VARCHAR, \"ICEV_temp_adj_tempoary$total_adj\" VARCHAR, \"HEV_temp_adj_tempoary$total_adj\" VARCHAR, \"BEV_temp_adj_tempoary$total_adj\" VARCHAR);"
+    psql -U postgres -d updated_local_emissions_db -c "\copy temp_data(\"join_id\" , \"FIPS code\" , \"State Abr.\" , \"BA Code\" , \"County name\" , \"CBSA title\" , \"CBSA 2012 pop\" , \"County 2012 pop\" , \"2013 code\" , \"2006 code\" , \"1990-based code\" , \"Division_number\" , \"ICEV_temp_adj_tempoary$total_adj\" , \"HEV_temp_adj_tempoary$total_adj\" , \"BEV_temp_adj_tempoary$total_adj\" ) FROM 'Temperature_and_urban_adjustments_by_fips_(2024-07-26).csv' DELIMITER ',' CSV HEADER; ;"
+
+    psql -U postgres -d updated_local_emissions_db -c "ALTER TABLE highway_data DROP COLUMN id;"
+
+  2. Generate export.pg file using pg_dump 
+    - /opt/homebrew/Cellar/libpq/17.4_1/bin/pg_dump -U postgres -d updated_local_emissions_db  -Fc -f export.pg
+    OR
+    - pg_dump -U postgres -d updated_local_emissions_db  -Fc -f export.pg
