@@ -16,7 +16,7 @@ const Footer = () => {
             Contact
           </Link>
           <Link
-            href="/"
+            href="https://pubs.acs.org/doi/10.1021/acs.est.5c05406"
             className="text-gray-300 hover:text-[#ffc107]"
             target="external"
           >

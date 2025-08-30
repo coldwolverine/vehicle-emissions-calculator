@@ -15,7 +15,11 @@ export default function Hero() {
         production (for electric vehicles), emissions from driving the vehicle
         (use phase) and end-of-life disposal. The methodology is based on
         research published in{" "}
-        <a href="#" className="text-blue-500 underline">
+        <a
+          href="https://pubs.acs.org/doi/10.1021/acs.est.5c05406"
+          className="text-blue-500 underline"
+          target="_blank"
+        >
           Smith et al., 2025.
         </a>
       </p>
@@ -99,7 +103,7 @@ export default function Hero() {
         <br />
         Default calculations are based on EPA and SAE standards, which assume:
         <ul className="ml-6 list-disc list-inside">
-          <li>57% city / 43% highway driving split</li>
+          <li>43% city / 57% highway driving split</li>
           <li>
             Standard PHEV utility factors (58% for 35-mile range, 69% for
             50-mile range)

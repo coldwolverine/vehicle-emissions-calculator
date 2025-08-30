@@ -43,3 +43,5 @@ next-env.d.ts
 *.sqlite3
 data_sqlite/
 bin/
+documentation.txt
+notes.txt
