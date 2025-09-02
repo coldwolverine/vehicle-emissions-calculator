@@ -25,7 +25,7 @@ export default function Dashboard() {
       secondPowertrain: "BEV200",
       ufPhev35: 0.58,
       ufPhev50: 0.69,
-      cityDriving: 0.57,
+      cityDriving: 0.43,
     },
   });
 

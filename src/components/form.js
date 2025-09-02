@@ -108,7 +108,7 @@ const powertrains = POWERTRAIN_DISPLAY_NAMES;
 
 const phev35UfDefault = 0.58;
 const phev50UfDefault = 0.69;
-const cityDrivingDefault = 0.57;
+const cityDrivingDefault = 0.43;
 
 const VehicleComparisonForm = ({ form }) => {
   const [counties, setCounties] = useState([]);
